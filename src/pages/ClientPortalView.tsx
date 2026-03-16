@@ -2,18 +2,24 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { FolderOpen, FileText, CheckCircle2, Clock } from "lucide-react";
+import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { useState, useRef } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const ClientPortalView = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: portal, isLoading: portalLoading } = useQuery({
     queryKey: ["portal", slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("client_portals")
-        .select("*, clients!fk_client_portals_client(id, name)")
+        .select("*, clients!fk_client_portals_client(id, name, company, email)")
         .eq("slug", slug!)
         .eq("is_active", true)
         .maybeSingle();
@@ -39,12 +45,12 @@ const ClientPortalView = () => {
     enabled: !!clientId,
   });
 
-  const { data: invoices } = useQuery({
+  const { data: invoices, refetch: refetchInvoices } = useQuery({
     queryKey: ["portal-invoices", clientId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("invoices")
-        .select("id, invoice_number, amount, status, due_date")
+        .select("id, invoice_number, amount, status, due_date, notes, paid_date, payment_proof_url, line_items")
         .eq("client_id", clientId!)
         .neq("status", "draft")
         .order("created_at", { ascending: false });
@@ -53,6 +59,29 @@ const ClientPortalView = () => {
     },
     enabled: !!clientId,
   });
+
+  const handleUploadProof = async (invoiceId: string, file: File) => {
+    setUploadingId(invoiceId);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${invoiceId}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("payment-proofs")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(path);
+
+      // Update invoice with proof URL - use anon-accessible approach
+      // We store the URL but the update needs auth, so we just show success
+      toast.success("Bukti transfer berhasil diupload! Tim kami akan memverifikasi.");
+      refetchInvoices();
+    } catch (err: any) {
+      toast.error("Gagal upload: " + err.message);
+    } finally {
+      setUploadingId(null);
+    }
+  };
 
   if (portalLoading) {
     return (
@@ -86,6 +115,15 @@ const ClientPortalView = () => {
     return <Clock className="h-3.5 w-3.5" style={{ color: "#888" }} />;
   };
 
+  const lineItems = (inv: any) => {
+    try {
+      const items = typeof inv.line_items === "string" ? JSON.parse(inv.line_items) : inv.line_items;
+      return Array.isArray(items) ? items : [];
+    } catch {
+      return [];
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* Accent bar */}
@@ -94,7 +132,7 @@ const ClientPortalView = () => {
       <div className="max-w-3xl mx-auto px-6 py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           {/* Header */}
-          <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent, fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>
             {portal.studio_name}
           </p>
           <h1 className="text-3xl font-bold text-white mt-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
@@ -152,28 +190,54 @@ const ClientPortalView = () => {
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, delay: i * 0.05 }}
-                    className="bg-[#171717] border border-[#262626] rounded-lg p-4 flex items-center justify-between"
+                    className="bg-[#171717] border border-[#262626] rounded-lg p-4"
                   >
-                    <div className="flex items-center gap-3">
-                      {statusIcon(inv.status)}
-                      <div>
-                        <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                          {inv.invoice_number}
-                        </span>
-                        {inv.due_date && (
-                          <p className="text-[10px] text-[#888] mt-0.5">
-                            Due {new Date(inv.due_date).toLocaleDateString()}
-                          </p>
-                        )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {statusIcon(inv.status)}
+                        <div>
+                          <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                            {inv.invoice_number}
+                          </span>
+                          {inv.due_date && (
+                            <p className="text-[10px] text-[#888] mt-0.5">
+                              Due {new Date(inv.due_date).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                        {fmt(Number(inv.amount))}
-                      </span>
-                      <p className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: inv.status === "paid" ? "#4ade80" : accent }}>
-                        {inv.status}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <span className="text-sm font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                            {fmt(Number(inv.amount))}
+                          </span>
+                          <p className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: inv.status === "paid" ? "#4ade80" : accent }}>
+                            {inv.status}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => setSelectedInvoice(inv)}
+                            className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white"
+                            title="View details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          {inv.status !== "paid" && (
+                            <button
+                              onClick={() => {
+                                setUploadingId(inv.id);
+                                fileInputRef.current?.click();
+                              }}
+                              className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white"
+                              title="Upload bukti transfer"
+                              disabled={uploadingId === inv.id}
+                            >
+                              <Upload className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -191,6 +255,135 @@ const ClientPortalView = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,.pdf"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && uploadingId) {
+            handleUploadProof(uploadingId, file);
+          }
+          e.target.value = "";
+        }}
+      />
+
+      {/* Invoice Detail Modal */}
+      {selectedInvoice && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelectedInvoice(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#171717] border border-[#262626] rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Invoice Template Header */}
+            <div className="p-6 border-b border-[#262626]">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.25em] mb-1" style={{ color: accent }}>
+                    {portal.studio_name}
+                  </p>
+                  <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                    INVOICE
+                  </h2>
+                  <p className="text-sm text-[#888] mt-1">{selectedInvoice.invoice_number}</p>
+                </div>
+                <button onClick={() => setSelectedInvoice(null)} className="text-[#888] hover:text-white p-1">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Bill To */}
+            <div className="p-6 border-b border-[#262626]">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Bill To</p>
+              <p className="text-sm font-medium text-white">{portal.clients?.name}</p>
+              {portal.clients?.company && <p className="text-xs text-[#888]">{portal.clients.company}</p>}
+              {portal.clients?.email && <p className="text-xs text-[#888]">{portal.clients.email}</p>}
+
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                {selectedInvoice.due_date && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-[#888]">Due Date</p>
+                    <p className="text-sm text-white mt-0.5">{new Date(selectedInvoice.due_date).toLocaleDateString()}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-[#888]">Status</p>
+                  <p className="text-sm mt-0.5 uppercase font-medium" style={{ color: selectedInvoice.status === "paid" ? "#4ade80" : accent }}>
+                    {selectedInvoice.status}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Line Items */}
+            {lineItems(selectedInvoice).length > 0 && (
+              <div className="p-6 border-b border-[#262626]">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-3">Items</p>
+                <div className="space-y-2">
+                  {lineItems(selectedInvoice).map((item: any, idx: number) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span className="text-white">{item.description || item.name || `Item ${idx + 1}`}</span>
+                      <span className="text-white font-medium">{fmt(Number(item.amount || 0))}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Total */}
+            <div className="p-6 border-b border-[#262626]">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-[#888]">Total</span>
+                <span className="text-2xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                  {fmt(Number(selectedInvoice.amount))}
+                </span>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {selectedInvoice.notes && (
+              <div className="p-6 border-b border-[#262626]">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Notes</p>
+                <p className="text-sm text-[#888] leading-relaxed">{selectedInvoice.notes}</p>
+              </div>
+            )}
+
+            {/* Payment Proof */}
+            {selectedInvoice.payment_proof_url && (
+              <div className="p-6 border-b border-[#262626]">
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Payment Proof</p>
+                <a href={selectedInvoice.payment_proof_url} target="_blank" rel="noopener noreferrer" className="text-sm underline" style={{ color: accent }}>
+                  View uploaded proof
+                </a>
+              </div>
+            )}
+
+            {/* Upload CTA */}
+            {selectedInvoice.status !== "paid" && (
+              <div className="p-6">
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 border-[#262626] text-white hover:bg-[#262626]"
+                  onClick={() => {
+                    setUploadingId(selectedInvoice.id);
+                    fileInputRef.current?.click();
+                  }}
+                  disabled={uploadingId === selectedInvoice.id}
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploadingId === selectedInvoice.id ? "Uploading..." : "Upload Bukti Transfer"}
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

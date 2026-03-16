@@ -115,8 +115,10 @@ export type Database = {
           due_date: string | null
           id: string
           invoice_number: string
+          line_items: Json | null
           notes: string | null
           paid_date: string | null
+          payment_proof_url: string | null
           project_id: string | null
           status: string
           updated_at: string
@@ -129,8 +131,10 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number: string
+          line_items?: Json | null
           notes?: string | null
           paid_date?: string | null
+          payment_proof_url?: string | null
           project_id?: string | null
           status?: string
           updated_at?: string
@@ -143,8 +147,10 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number?: string
+          line_items?: Json | null
           notes?: string | null
           paid_date?: string | null
+          payment_proof_url?: string | null
           project_id?: string | null
           status?: string
           updated_at?: string
