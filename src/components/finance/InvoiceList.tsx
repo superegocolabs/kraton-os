@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { DollarSign, CheckCircle2, Trash2 } from "lucide-react";
+import { DollarSign, CheckCircle2, Trash2, Eye, EyeOff, ExternalLink, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -22,6 +22,8 @@ interface InvoiceListProps {
   isLoading: boolean;
   onMarkPaid: (id: string) => void;
   onDelete: (id: string) => void;
+  onToggleHidden: (id: string, hidden: boolean) => void;
+  onEdit: (invoice: Invoice) => void;
 }
 
 const statusStyles: Record<string, string> = {
@@ -32,7 +34,7 @@ const statusStyles: Record<string, string> = {
   cancelled: "bg-muted text-muted-foreground",
 };
 
-export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: InvoiceListProps) {
+export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete, onToggleHidden, onEdit }: InvoiceListProps) {
   const fmt = (v: number) => formatCurrency(v);
 
   if (isLoading) {
@@ -62,7 +64,7 @@ export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: Invoi
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: i * 0.03 }}
-          className="bg-card border border-border rounded-lg p-4 flex items-center gap-4"
+          className={`bg-card border border-border rounded-lg p-4 flex items-center gap-4 ${inv.hidden_from_portal ? "opacity-60" : ""}`}
         >
           {/* Info */}
           <div className="flex-1 min-w-0">
@@ -73,6 +75,23 @@ export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: Invoi
               <span className={`text-[10px] uppercase tracking-wider font-body font-medium px-2 py-0.5 rounded ${statusStyles[inv.status] ?? statusStyles.draft}`}>
                 {inv.status}
               </span>
+              {inv.hidden_from_portal && (
+                <span className="text-[10px] uppercase tracking-wider font-body font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                  Hidden
+                </span>
+              )}
+              {inv.payment_proof_url && (
+                <a
+                  href={inv.payment_proof_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-body font-medium px-2 py-0.5 rounded bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
+                  title="View payment proof"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Proof
+                </a>
+              )}
             </div>
             <div className="flex items-center gap-3 mt-1">
               {inv.clients?.name && (
@@ -93,6 +112,17 @@ export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: Invoi
 
           {/* Actions */}
           <div className="flex items-center gap-1">
+            {inv.status === "draft" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => onEdit(inv)}
+                title="Edit draft"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
             {(inv.status === "sent" || inv.status === "overdue" || inv.status === "draft") && (
               <Button
                 variant="ghost"
@@ -104,6 +134,15 @@ export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: Invoi
                 <CheckCircle2 className="h-4 w-4" />
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={() => onToggleHidden(inv.id, !inv.hidden_from_portal)}
+              title={inv.hidden_from_portal ? "Show to client" : "Hide from client"}
+            >
+              {inv.hidden_from_portal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">

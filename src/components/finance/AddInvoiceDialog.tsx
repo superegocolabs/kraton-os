@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,29 +15,63 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+export interface InvoiceFormValues {
+  invoice_number: string;
+  amount: number;
+  client_id: string | null;
+  project_id: string | null;
+  due_date: string | null;
+  status: string;
+  notes: string;
+}
+
+export interface InvoiceInitialValues {
+  id: string;
+  invoice_number: string;
+  amount: number;
+  client_id: string | null;
+  project_id: string | null;
+  due_date: string | null;
+  status: string;
+  notes: string | null;
+}
+
 interface AddInvoiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: {
-    invoice_number: string;
-    amount: number;
-    client_id: string | null;
-    project_id: string | null;
-    due_date: string | null;
-    status: string;
-    notes: string;
-  }) => void;
+  onSubmit: (values: InvoiceFormValues) => void;
   isSubmitting: boolean;
   clients: { id: string; name: string }[];
+  initialValues?: InvoiceInitialValues | null;
 }
 
-export function AddInvoiceDialog({ open, onOpenChange, onSubmit, isSubmitting, clients }: AddInvoiceDialogProps) {
+export function AddInvoiceDialog({ open, onOpenChange, onSubmit, isSubmitting, clients, initialValues }: AddInvoiceDialogProps) {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [clientId, setClientId] = useState<string>("none");
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("draft");
   const [notes, setNotes] = useState("");
+
+  const isEdit = !!initialValues;
+
+  useEffect(() => {
+    if (initialValues && open) {
+      setInvoiceNumber(initialValues.invoice_number);
+      setAmount(String(initialValues.amount));
+      setClientId(initialValues.client_id ?? "none");
+      setDueDate(initialValues.due_date ?? "");
+      setStatus(initialValues.status);
+      setNotes(initialValues.notes ?? "");
+    } else if (!open) {
+      setInvoiceNumber("");
+      setAmount("");
+      setClientId("none");
+      setDueDate("");
+      setStatus("draft");
+      setNotes("");
+    }
+  }, [initialValues, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +87,6 @@ export function AddInvoiceDialog({ open, onOpenChange, onSubmit, isSubmitting, c
       status,
       notes: notes.trim(),
     });
-    setInvoiceNumber("");
-    setAmount("");
-    setClientId("none");
-    setDueDate("");
-    setStatus("draft");
-    setNotes("");
   };
 
   const fieldClass = "bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary font-body";
@@ -67,7 +95,7 @@ export function AddInvoiceDialog({ open, onOpenChange, onSubmit, isSubmitting, c
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg">New Invoice</DialogTitle>
+          <DialogTitle className="font-display text-lg">{isEdit ? "Edit Invoice" : "New Invoice"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
@@ -145,9 +173,22 @@ export function AddInvoiceDialog({ open, onOpenChange, onSubmit, isSubmitting, c
             </Select>
           </div>
 
+          <div>
+            <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">
+              Notes
+            </label>
+            <Input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className={`mt-1.5 ${fieldClass}`}
+              placeholder="Optional notes"
+              maxLength={500}
+            />
+          </div>
+
           <div className="pt-2">
             <Button type="submit" variant="accent" className="w-full" disabled={isSubmitting || !invoiceNumber.trim() || !amount}>
-              {isSubmitting ? "Creating..." : "Create Invoice"}
+              {isSubmitting ? (isEdit ? "Saving..." : "Creating...") : (isEdit ? "Save Changes" : "Create Invoice")}
             </Button>
           </div>
         </form>

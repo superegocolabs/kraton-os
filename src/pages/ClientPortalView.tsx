@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X } from "lucide-react";
+import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X, Send, File } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -12,6 +12,8 @@ const ClientPortalView = () => {
   const { slug } = useParams<{ slug: string }>();
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<{ invoiceId: string; file: File } | null>(null);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: portal, isLoading: portalLoading } = useQuery({
@@ -50,9 +52,10 @@ const ClientPortalView = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("invoices")
-        .select("id, invoice_number, amount, status, due_date, notes, paid_date, payment_proof_url, line_items")
+        .select("id, invoice_number, amount, status, due_date, notes, paid_date, payment_proof_url, line_items, hidden_from_portal")
         .eq("client_id", clientId!)
         .neq("status", "draft")
+        .eq("hidden_from_portal", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -60,9 +63,11 @@ const ClientPortalView = () => {
     enabled: !!clientId,
   });
 
-  const handleUploadProof = async (invoiceId: string, file: File) => {
-    setUploadingId(invoiceId);
+  const handleSendProof = async () => {
+    if (!pendingFile) return;
+    setIsSending(true);
     try {
+      const { invoiceId, file } = pendingFile;
       const ext = file.name.split(".").pop();
       const path = `${invoiceId}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
@@ -72,14 +77,20 @@ const ClientPortalView = () => {
 
       const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(path);
 
-      // Update invoice with proof URL - use anon-accessible approach
-      // We store the URL but the update needs auth, so we just show success
-      toast.success("Bukti transfer berhasil diupload! Tim kami akan memverifikasi.");
+      // Update invoice with proof URL (anon UPDATE policy allows this)
+      const { error: updateError } = await supabase
+        .from("invoices")
+        .update({ payment_proof_url: urlData.publicUrl })
+        .eq("id", invoiceId);
+      if (updateError) throw updateError;
+
+      toast.success("Bukti transfer berhasil dikirim! Tim kami akan memverifikasi.");
+      setPendingFile(null);
       refetchInvoices();
     } catch (err: any) {
-      toast.error("Gagal upload: " + err.message);
+      toast.error("Gagal mengirim: " + err.message);
     } finally {
-      setUploadingId(null);
+      setIsSending(false);
     }
   };
 
@@ -231,7 +242,6 @@ const ClientPortalView = () => {
                               }}
                               className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white"
                               title="Upload bukti transfer"
-                              disabled={uploadingId === inv.id}
                             >
                               <Upload className="h-4 w-4" />
                             </button>
@@ -239,6 +249,40 @@ const ClientPortalView = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Pending file confirmation for this invoice */}
+                    {pendingFile?.invoiceId === inv.id && (
+                      <div className="mt-3 p-3 bg-[#1a1a1a] border border-[#333] rounded-md">
+                        <div className="flex items-center gap-2 text-sm text-white">
+                          <File className="h-4 w-4" style={{ color: accent }} />
+                          <span className="truncate flex-1">{pendingFile.file.name}</span>
+                          <span className="text-xs text-[#888]">
+                            {(pendingFile.file.size / 1024).toFixed(0)} KB
+                          </span>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            className="flex-1 gap-1.5 text-xs"
+                            style={{ backgroundColor: accent, color: "#0A0A0A" }}
+                            onClick={handleSendProof}
+                            disabled={isSending}
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                            {isSending ? "Mengirim..." : "Kirim"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs border-[#333] text-[#888] hover:text-white hover:bg-[#262626]"
+                            onClick={() => setPendingFile(null)}
+                            disabled={isSending}
+                          >
+                            Batal
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -265,7 +309,8 @@ const ClientPortalView = () => {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file && uploadingId) {
-            handleUploadProof(uploadingId, file);
+            setPendingFile({ invoiceId: uploadingId, file });
+            setUploadingId(null);
           }
           e.target.value = "";
         }}
@@ -374,10 +419,9 @@ const ClientPortalView = () => {
                     setUploadingId(selectedInvoice.id);
                     fileInputRef.current?.click();
                   }}
-                  disabled={uploadingId === selectedInvoice.id}
                 >
                   <Upload className="h-4 w-4" />
-                  {uploadingId === selectedInvoice.id ? "Uploading..." : "Upload Bukti Transfer"}
+                  Upload Bukti Transfer
                 </Button>
               </div>
             )}

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { InvoiceList } from "./InvoiceList";
 import { AddInvoiceDialog } from "./AddInvoiceDialog";
 import type { Tables } from "@/integrations/supabase/types";
+import type { InvoiceFormValues, InvoiceInitialValues } from "./AddInvoiceDialog";
 import { formatCurrency } from "@/lib/currency";
 
 type Invoice = Tables<"invoices">;
@@ -21,9 +22,16 @@ interface FinancePageProps {
 
 export function FinancePage({ user }: FinancePageProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<InvoiceInitialValues | null>(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const queryClient = useQueryClient();
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    queryClient.invalidateQueries({ queryKey: ["invoices", "pending"] });
+    queryClient.invalidateQueries({ queryKey: ["invoices", "revenue", "month"] });
+  };
 
   const { data: invoices, isLoading } = useQuery({
     queryKey: ["invoices"],
@@ -47,7 +55,7 @@ export function FinancePage({ user }: FinancePageProps) {
   });
 
   const addInvoice = useMutation({
-    mutationFn: async (values: { invoice_number: string; amount: number; client_id: string | null; project_id: string | null; due_date: string | null; status: string; notes: string }) => {
+    mutationFn: async (values: InvoiceFormValues) => {
       const { error } = await supabase.from("invoices").insert({
         ...values,
         user_id: user!.id,
@@ -55,11 +63,25 @@ export function FinancePage({ user }: FinancePageProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", "pending"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", "revenue", "month"] });
+      invalidateAll();
       toast.success("Invoice created.");
       setAddDialogOpen(false);
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const updateInvoice = useMutation({
+    mutationFn: async ({ id, values }: { id: string; values: InvoiceFormValues }) => {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ ...values, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast.success("Invoice updated.");
+      setEditingInvoice(null);
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -73,10 +95,23 @@ export function FinancePage({ user }: FinancePageProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", "pending"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", "revenue", "month"] });
+      invalidateAll();
       toast.success("Invoice marked as paid.");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const toggleHidden = useMutation({
+    mutationFn: async ({ id, hidden }: { id: string; hidden: boolean }) => {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ hidden_from_portal: hidden, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { hidden }) => {
+      invalidateAll();
+      toast.success(hidden ? "Invoice hidden from client portal." : "Invoice visible to client.");
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -87,9 +122,7 @@ export function FinancePage({ user }: FinancePageProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", "pending"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", "revenue", "month"] });
+      invalidateAll();
       toast.success("Invoice deleted.");
     },
     onError: (err: any) => toast.error(err.message),
@@ -110,6 +143,19 @@ export function FinancePage({ user }: FinancePageProps) {
     const matchStatus = filterStatus === "all" || inv.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  const handleEditInvoice = (inv: Invoice & { clients: { name: string } | null }) => {
+    setEditingInvoice({
+      id: inv.id,
+      invoice_number: inv.invoice_number,
+      amount: Number(inv.amount),
+      client_id: inv.client_id,
+      project_id: inv.project_id,
+      due_date: inv.due_date,
+      status: inv.status,
+      notes: inv.notes,
+    });
+  };
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">
@@ -178,16 +224,29 @@ export function FinancePage({ user }: FinancePageProps) {
             isLoading={isLoading}
             onMarkPaid={(id) => markAsPaid.mutate(id)}
             onDelete={(id) => deleteInvoice.mutate(id)}
+            onToggleHidden={(id, hidden) => toggleHidden.mutate({ id, hidden })}
+            onEdit={handleEditInvoice}
           />
         </div>
       </motion.div>
 
+      {/* Add new invoice dialog */}
       <AddInvoiceDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onSubmit={(values) => addInvoice.mutate(values)}
         isSubmitting={addInvoice.isPending}
         clients={clients ?? []}
+      />
+
+      {/* Edit invoice dialog */}
+      <AddInvoiceDialog
+        open={!!editingInvoice}
+        onOpenChange={(open) => { if (!open) setEditingInvoice(null); }}
+        onSubmit={(values) => editingInvoice && updateInvoice.mutate({ id: editingInvoice.id, values })}
+        isSubmitting={updateInvoice.isPending}
+        clients={clients ?? []}
+        initialValues={editingInvoice}
       />
     </div>
   );
