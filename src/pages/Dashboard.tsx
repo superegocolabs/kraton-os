@@ -53,6 +53,7 @@ const Dashboard = () => {
     if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
     if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     if (path.startsWith("/dashboard/projects")) return <ProjectsPage user={user} />;
+    if (path.startsWith("/dashboard/portals")) return <PortalsPage user={user} />;
     return <DashboardContent user={user} />;
   };
 
