@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { formatCurrency } from "@/lib/currency";
 
 interface DashboardContentProps {
   user: User | null;
