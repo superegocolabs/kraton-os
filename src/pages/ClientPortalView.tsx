@@ -45,6 +45,7 @@ const ClientPortalView = () => {
         .from("invoices")
         .select("id, invoice_number, amount, status, due_date")
         .eq("client_id", clientId!)
+        .neq("status", "draft")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
