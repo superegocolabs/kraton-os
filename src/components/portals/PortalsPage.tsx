@@ -26,7 +26,7 @@ export function PortalsPage({ user }: PortalsPageProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("client_portals")
-        .select("*, clients(name)")
+        .select("*, clients!fk_client_portals_client(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Portal[];

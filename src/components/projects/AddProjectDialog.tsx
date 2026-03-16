@@ -23,12 +23,14 @@ export function AddProjectDialog({ open, onOpenChange, onSubmit, isSubmitting, c
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || name.trim().length > 100) return;
+    const parsedBudget = parseFloat(budget) || 0;
+    if (parsedBudget < 0 || description.trim().length > 1000) return;
     onSubmit({
       name: name.trim(),
       description: description.trim(),
       client_id: clientId === "none" ? null : clientId,
-      budget: parseFloat(budget) || 0,
+      budget: parsedBudget,
       status,
       start_date: startDate || null,
       end_date: endDate || null,

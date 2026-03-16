@@ -59,6 +59,13 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_client_portals_client"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       clients: {
@@ -215,7 +222,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      client_has_active_portal: {
+        Args: { _client_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

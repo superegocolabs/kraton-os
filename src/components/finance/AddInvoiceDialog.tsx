@@ -41,10 +41,12 @@ export function AddInvoiceDialog({ open, onOpenChange, onSubmit, isSubmitting, c
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!invoiceNumber.trim() || !amount) return;
+    const parsedAmount = parseFloat(amount);
+    if (!invoiceNumber.trim() || !amount || isNaN(parsedAmount) || parsedAmount <= 0) return;
+    if (invoiceNumber.trim().length > 50 || notes.trim().length > 500) return;
     onSubmit({
       invoice_number: invoiceNumber.trim(),
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       client_id: clientId === "none" ? null : clientId,
       project_id: null,
       due_date: dueDate || null,
