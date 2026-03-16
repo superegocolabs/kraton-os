@@ -26,8 +26,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Creative";
   const { activeProjects, totalClients, monthlyRevenue, pendingInvoices, recentActivity } = useDashboardStats();
 
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(val);
+  const fmtCurrency = (val: number) => formatCurrency(val);
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
