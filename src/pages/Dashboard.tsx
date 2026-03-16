@@ -7,6 +7,7 @@ import { DashboardContent } from "@/components/DashboardContent";
 import { CRMPage } from "@/components/crm/CRMPage";
 import { FinancePage } from "@/components/finance/FinancePage";
 import { ProjectsPage } from "@/components/projects/ProjectsPage";
+import { PortalsPage } from "@/components/portals/PortalsPage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
