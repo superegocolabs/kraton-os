@@ -10,6 +10,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 interface DashboardContentProps {
   user: User | null;
@@ -23,6 +24,10 @@ const fadeIn = (delay: number) => ({
 
 export function DashboardContent({ user }: DashboardContentProps) {
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Creative";
+  const { activeProjects, totalClients, monthlyRevenue, pendingInvoices, recentActivity } = useDashboardStats();
+
+  const formatCurrency = (val: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(val);
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -49,8 +54,12 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </h3>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-4xl font-display font-bold text-foreground">0</p>
-          <p className="text-sm text-muted-foreground font-body mt-1">No active projects yet</p>
+          <p className="text-4xl font-display font-bold text-foreground">
+            {activeProjects.isLoading ? "—" : activeProjects.data}
+          </p>
+          <p className="text-sm text-muted-foreground font-body mt-1">
+            {activeProjects.data === 0 ? "No active projects yet" : "Active projects"}
+          </p>
         </motion.div>
 
         {/* Revenue */}
@@ -64,7 +73,9 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </h3>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">$0</p>
+          <p className="text-3xl font-display font-bold text-foreground">
+            {monthlyRevenue.isLoading ? "—" : formatCurrency(monthlyRevenue.data ?? 0)}
+          </p>
           <p className="text-sm text-muted-foreground font-body mt-1">This month</p>
         </motion.div>
 
@@ -79,7 +90,9 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </h3>
             <Users className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">0</p>
+          <p className="text-3xl font-display font-bold text-foreground">
+            {totalClients.isLoading ? "—" : totalClients.data}
+          </p>
           <p className="text-sm text-muted-foreground font-body mt-1">In your CRM</p>
         </motion.div>
 
@@ -122,7 +135,9 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </h3>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-3xl font-display font-bold text-foreground">0</p>
+          <p className="text-3xl font-display font-bold text-foreground">
+            {pendingInvoices.isLoading ? "—" : pendingInvoices.data}
+          </p>
           <p className="text-sm text-muted-foreground font-body mt-1">Awaiting payment</p>
         </motion.div>
 
@@ -137,7 +152,19 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </h3>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-sm text-muted-foreground font-body">No recent activity</p>
+          {recentActivity.isLoading ? (
+            <p className="text-sm text-muted-foreground font-body">Loading...</p>
+          ) : recentActivity.data && recentActivity.data.length > 0 ? (
+            <ul className="space-y-2">
+              {recentActivity.data.map((item, i) => (
+                <li key={i} className="text-sm text-muted-foreground font-body truncate">
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground font-body">No recent activity</p>
+          )}
         </motion.div>
       </div>
     </div>
