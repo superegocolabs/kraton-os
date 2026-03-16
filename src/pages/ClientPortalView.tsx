@@ -99,7 +99,7 @@ const ClientPortalView = () => {
             {portal.clients?.name}
           </h1>
           <p className="text-[#888] mt-3 text-sm leading-relaxed max-w-lg">
-            {portal.welcome_message}
+            {String(portal.welcome_message ?? "").replace(/<[^>]*>/g, "")}
           </p>
 
           {/* Projects */}
