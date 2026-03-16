@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardContent } from "@/components/DashboardContent";
+import { CRMPage } from "@/components/crm/CRMPage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -43,6 +45,13 @@ const Dashboard = () => {
     );
   }
 
+  const renderContent = () => {
+    const path = location.pathname;
+    if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
+    // Future modules go here
+    return <DashboardContent user={user} />;
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -57,7 +66,7 @@ const Dashboard = () => {
             </div>
           </header>
           <main className="flex-1 overflow-auto">
-            <DashboardContent user={user} />
+            {renderContent()}
           </main>
         </div>
       </div>
