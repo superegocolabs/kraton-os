@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { InvoiceList } from "./InvoiceList";
 import { AddInvoiceDialog } from "./AddInvoiceDialog";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatCurrency } from "@/lib/currency";
 
 type Invoice = Tables<"invoices">;
 type Client = Tables<"clients">;

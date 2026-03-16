@@ -77,7 +77,10 @@ const ClientPortalView = () => {
   }
 
   const accent = portal.accent_color ?? "#C5A47E";
-  const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(v);
+  const fmt = (v: number) => {
+    const { formatCurrency } = require("@/lib/currency");
+    return formatCurrency(v);
+  };
 
   const statusIcon = (status: string) => {
     if (status === "completed" || status === "paid") return <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />;

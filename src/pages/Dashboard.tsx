@@ -56,6 +56,8 @@ const Dashboard = () => {
     if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     if (path.startsWith("/dashboard/projects")) return <ProjectsPage user={user} />;
     if (path.startsWith("/dashboard/portals")) return <PortalsPage user={user} />;
+    if (path.startsWith("/dashboard/portfolio")) return <PortfolioPage user={user} />;
+    if (path.startsWith("/dashboard/frameworks")) return <FrameworksPage user={user} />;
     return <DashboardContent user={user} />;
   };
 

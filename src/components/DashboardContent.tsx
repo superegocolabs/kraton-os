@@ -74,7 +74,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </div>
           <p className="text-3xl font-display font-bold text-foreground">
-            {monthlyRevenue.isLoading ? "—" : formatCurrency(monthlyRevenue.data ?? 0)}
+            {monthlyRevenue.isLoading ? "—" : fmtCurrency(monthlyRevenue.data ?? 0)}
           </p>
           <p className="text-sm text-muted-foreground font-body mt-1">This month</p>
         </motion.div>
