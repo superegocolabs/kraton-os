@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardContent } from "@/components/DashboardContent";
 import { CRMPage } from "@/components/crm/CRMPage";
+import { FinancePage } from "@/components/finance/FinancePage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
