@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_portals: {
+        Row: {
+          accent_color: string | null
+          client_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+          studio_name: string | null
+          updated_at: string
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          studio_name?: string | null
+          updated_at?: string
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          studio_name?: string | null
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_portals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           company: string | null
