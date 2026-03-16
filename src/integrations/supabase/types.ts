@@ -113,6 +113,7 @@ export type Database = {
           client_id: string | null
           created_at: string
           due_date: string | null
+          hidden_from_portal: boolean
           id: string
           invoice_number: string
           line_items: Json | null
@@ -129,6 +130,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           due_date?: string | null
+          hidden_from_portal?: boolean
           id?: string
           invoice_number: string
           line_items?: Json | null
@@ -145,6 +147,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           due_date?: string | null
+          hidden_from_portal?: boolean
           id?: string
           invoice_number?: string
           line_items?: Json | null
