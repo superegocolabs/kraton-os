@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatCurrency } from "@/lib/currency";
 
 type Invoice = Tables<"invoices"> & { clients: { name: string } | null };
 
@@ -32,8 +33,7 @@ const statusStyles: Record<string, string> = {
 };
 
 export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: InvoiceListProps) {
-  const fmt = (v: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(v);
+  const fmt = (v: number) => formatCurrency(v);
 
   if (isLoading) {
     return (

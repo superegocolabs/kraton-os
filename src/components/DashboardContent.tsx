@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { formatCurrency } from "@/lib/currency";
 
 interface DashboardContentProps {
   user: User | null;
@@ -26,8 +27,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Creative";
   const { activeProjects, totalClients, monthlyRevenue, pendingInvoices, recentActivity } = useDashboardStats();
 
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(val);
+  const fmtCurrency = (val: number) => formatCurrency(val);
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -74,7 +74,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </div>
           <p className="text-3xl font-display font-bold text-foreground">
-            {monthlyRevenue.isLoading ? "—" : formatCurrency(monthlyRevenue.data ?? 0)}
+            {monthlyRevenue.isLoading ? "—" : fmtCurrency(monthlyRevenue.data ?? 0)}
           </p>
           <p className="text-sm text-muted-foreground font-body mt-1">This month</p>
         </motion.div>

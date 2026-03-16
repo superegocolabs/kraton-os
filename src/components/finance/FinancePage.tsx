@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { InvoiceList } from "./InvoiceList";
 import { AddInvoiceDialog } from "./AddInvoiceDialog";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatCurrency } from "@/lib/currency";
 
 type Invoice = Tables<"invoices">;
 type Client = Tables<"clients">;
@@ -100,7 +101,7 @@ export function FinancePage({ user }: FinancePageProps) {
   const overdueCount = invoices?.filter((i) => i.status === "overdue").length ?? 0;
   const paidCount = invoices?.filter((i) => i.status === "paid").length ?? 0;
 
-  const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(v);
+  const fmt = (v: number) => formatCurrency(v);
 
   const filtered = invoices?.filter((inv) => {
     const matchSearch =

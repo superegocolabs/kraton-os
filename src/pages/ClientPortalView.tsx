@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { FolderOpen, FileText, CheckCircle2, Clock } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 const ClientPortalView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -45,6 +46,7 @@ const ClientPortalView = () => {
         .from("invoices")
         .select("id, invoice_number, amount, status, due_date")
         .eq("client_id", clientId!)
+        .neq("status", "draft")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -76,7 +78,7 @@ const ClientPortalView = () => {
   }
 
   const accent = portal.accent_color ?? "#C5A47E";
-  const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(v);
+  const fmt = (v: number) => formatCurrency(v);
 
   const statusIcon = (status: string) => {
     if (status === "completed" || status === "paid") return <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />;

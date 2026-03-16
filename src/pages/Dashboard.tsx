@@ -8,6 +8,8 @@ import { CRMPage } from "@/components/crm/CRMPage";
 import { FinancePage } from "@/components/finance/FinancePage";
 import { ProjectsPage } from "@/components/projects/ProjectsPage";
 import { PortalsPage } from "@/components/portals/PortalsPage";
+import { PortfolioPage } from "@/components/portfolio/PortfolioPage";
+import { FrameworksPage } from "@/components/frameworks/FrameworksPage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -54,6 +56,8 @@ const Dashboard = () => {
     if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     if (path.startsWith("/dashboard/projects")) return <ProjectsPage user={user} />;
     if (path.startsWith("/dashboard/portals")) return <PortalsPage user={user} />;
+    if (path.startsWith("/dashboard/portfolio")) return <PortfolioPage user={user} />;
+    if (path.startsWith("/dashboard/frameworks")) return <FrameworksPage user={user} />;
     return <DashboardContent user={user} />;
   };
 
