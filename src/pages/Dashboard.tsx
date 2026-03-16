@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardContent } from "@/components/DashboardContent";
 import { CRMPage } from "@/components/crm/CRMPage";
+import { FinancePage } from "@/components/finance/FinancePage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -48,7 +49,7 @@ const Dashboard = () => {
   const renderContent = () => {
     const path = location.pathname;
     if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
-    // Future modules go here
+    if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     return <DashboardContent user={user} />;
   };
 
