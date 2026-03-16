@@ -32,8 +32,7 @@ const statusStyles: Record<string, string> = {
 };
 
 export function InvoiceList({ invoices, isLoading, onMarkPaid, onDelete }: InvoiceListProps) {
-  const fmt = (v: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(v);
+  const fmt = (v: number) => formatCurrency(v);
 
   if (isLoading) {
     return (
