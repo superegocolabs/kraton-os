@@ -49,7 +49,7 @@ const Dashboard = () => {
   const renderContent = () => {
     const path = location.pathname;
     if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
-    // Future modules go here
+    if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     return <DashboardContent user={user} />;
   };
 
