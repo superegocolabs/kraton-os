@@ -12,7 +12,7 @@ const ClientPortalView = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("client_portals")
-        .select("*, clients(id, name)")
+        .select("*, clients!fk_client_portals_client(id, name)")
         .eq("slug", slug!)
         .eq("is_active", true)
         .maybeSingle();
