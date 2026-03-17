@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FolderOpen, Building2, Calendar } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects"> & { clients: { name: string } | null };
@@ -19,7 +20,7 @@ const statusStyles: Record<string, string> = {
 };
 
 export function ProjectList({ projects, isLoading, onSelect }: ProjectListProps) {
-  const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(v);
+  const fmt = (v: number) => formatCurrency(v);
 
   if (isLoading) {
     return (
