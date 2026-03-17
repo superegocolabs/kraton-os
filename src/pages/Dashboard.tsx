@@ -10,6 +10,7 @@ import { ProjectsPage } from "@/components/projects/ProjectsPage";
 import { PortalsPage } from "@/components/portals/PortalsPage";
 import { PortfolioPage } from "@/components/portfolio/PortfolioPage";
 import { FrameworksPage } from "@/components/frameworks/FrameworksPage";
+import { BoardsPage } from "@/components/boards/BoardsPage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -25,6 +26,12 @@ const Dashboard = () => {
           navigate("/auth");
         } else {
           setUser(session.user);
+          // Upsert profile
+          supabase.from("profiles").upsert({
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.user_metadata?.full_name ?? null,
+          }, { onConflict: "id" }).then(() => {});
         }
         setLoading(false);
       }
@@ -35,6 +42,11 @@ const Dashboard = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
+        supabase.from("profiles").upsert({
+          id: session.user.id,
+          email: session.user.email,
+          full_name: session.user.user_metadata?.full_name ?? null,
+        }, { onConflict: "id" }).then(() => {});
       }
       setLoading(false);
     });
@@ -52,6 +64,7 @@ const Dashboard = () => {
 
   const renderContent = () => {
     const path = location.pathname;
+    if (path.startsWith("/dashboard/boards")) return <BoardsPage user={user} />;
     if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
     if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     if (path.startsWith("/dashboard/projects")) return <ProjectsPage user={user} />;

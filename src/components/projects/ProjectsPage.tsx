@@ -3,13 +3,14 @@ import { User } from "@supabase/supabase-js";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Plus, Search, ArrowLeft } from "lucide-react";
+import { Plus, Search, ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ProjectList } from "./ProjectList";
 import { ProjectDetail } from "./ProjectDetail";
 import { AddProjectDialog } from "./AddProjectDialog";
+import { useMembership, FREE_LIMITS } from "@/hooks/useMembership";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects"> & { clients: { name: string } | null };
@@ -24,6 +25,7 @@ export function ProjectsPage({ user }: ProjectsPageProps) {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const queryClient = useQueryClient();
+  const { isMember } = useMembership(user?.id);
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ["projects"],
@@ -91,6 +93,16 @@ export function ProjectsPage({ user }: ProjectsPageProps) {
   });
 
   const selectedProject = projects?.find((p) => p.id === selectedProjectId);
+  const projectCount = projects?.length ?? 0;
+  const canCreate = isMember || projectCount < FREE_LIMITS.projects;
+
+  const handleCreate = () => {
+    if (!canCreate) {
+      toast.error("Upgrade membership untuk membuat project lebih banyak.");
+      return;
+    }
+    setAddDialogOpen(true);
+  };
 
   if (selectedProject) {
     return (
@@ -120,10 +132,22 @@ export function ProjectsPage({ user }: ProjectsPageProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-foreground">Projects</h1>
-            <p className="text-sm text-muted-foreground font-body mt-1">Manage your creative projects.</p>
+            <p className="text-sm text-muted-foreground font-body mt-1">
+              Manage your creative projects.
+              {!isMember && (
+                <span className="text-primary ml-2">
+                  ({projectCount}/{FREE_LIMITS.projects} projects)
+                </span>
+              )}
+            </p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="h-4 w-4" /> New Project
+          <Button
+            variant="accent"
+            className="gap-2"
+            onClick={handleCreate}
+          >
+            {canCreate ? <Plus className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            New Project
           </Button>
         </div>
 

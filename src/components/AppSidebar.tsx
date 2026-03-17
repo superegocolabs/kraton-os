@@ -10,6 +10,8 @@ import {
   Globe,
   LogOut,
   FolderOpen,
+  Kanban,
+  Shield,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,9 +25,11 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Boards", url: "/dashboard/boards", icon: Kanban },
   { title: "Projects", url: "/dashboard/projects", icon: FolderOpen },
   { title: "CRM", url: "/dashboard/crm", icon: Users },
   { title: "Finance", url: "/dashboard/finance", icon: DollarSign },
@@ -43,6 +47,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: role } = useUserRole(user?.id);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -91,6 +96,27 @@ export function AppSidebar({ user }: AppSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {role === "admin" && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
+              Admin
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => navigate("/admin")}
+                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150"
+                  >
+                    <Shield className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span className="font-body text-sm">Admin Panel</span>}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-2">
