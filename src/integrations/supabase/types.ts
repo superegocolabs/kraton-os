@@ -14,6 +14,112 @@ export type Database = {
   }
   public: {
     Tables: {
+      board_cards: {
+        Row: {
+          assignee: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          labels: Json | null
+          list_id: string
+          position: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assignee?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          labels?: Json | null
+          list_id: string
+          position?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assignee?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          labels?: Json | null
+          list_id?: string
+          position?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_cards_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "board_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_lists: {
+        Row: {
+          board_id: string
+          created_at: string | null
+          id: string
+          position: number | null
+          title: string
+        }
+        Insert: {
+          board_id: string
+          created_at?: string | null
+          id?: string
+          position?: number | null
+          title: string
+        }
+        Update: {
+          board_id?: string
+          created_at?: string | null
+          id?: string
+          position?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_lists_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      boards: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_portals: {
         Row: {
           accent_color: string | null
@@ -176,6 +282,63 @@ export type Database = {
           },
         ]
       }
+      memberships: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          plan_name: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan_name?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan_name?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           budget: number | null
@@ -226,6 +389,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -235,9 +416,17 @@ export type Database = {
         Args: { _client_id: string }
         Returns: boolean
       }
+      has_active_membership: { Args: { _user_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -364,6 +553,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
