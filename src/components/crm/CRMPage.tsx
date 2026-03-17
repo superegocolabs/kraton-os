@@ -3,13 +3,14 @@ import { User } from "@supabase/supabase-js";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Plus, Search, ArrowLeft } from "lucide-react";
+import { Plus, Search, ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ClientList } from "./ClientList";
 import { ClientDetail } from "./ClientDetail";
 import { AddClientDialog } from "./AddClientDialog";
+import { useMembership, FREE_LIMITS } from "@/hooks/useMembership";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Client = Tables<"clients">;
@@ -23,6 +24,7 @@ export function CRMPage({ user }: CRMPageProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const queryClient = useQueryClient();
+  const { isMember } = useMembership(user?.id);
 
   const { data: clients, isLoading } = useQuery({
     queryKey: ["clients"],
@@ -86,6 +88,16 @@ export function CRMPage({ user }: CRMPageProps) {
   );
 
   const selectedClient = clients?.find((c) => c.id === selectedClientId);
+  const clientCount = clients?.length ?? 0;
+  const canCreate = isMember || clientCount < FREE_LIMITS.clients;
+
+  const handleCreate = () => {
+    if (!canCreate) {
+      toast.error("Upgrade membership untuk menambah client lebih banyak.");
+      return;
+    }
+    setAddDialogOpen(true);
+  };
 
   if (selectedClient) {
     return (
@@ -111,20 +123,24 @@ export function CRMPage({ user }: CRMPageProps) {
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-foreground">Clients</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Manage your client relationships.
+              {!isMember && (
+                <span className="text-primary ml-2">
+                  ({clientCount}/{FREE_LIMITS.clients} clients)
+                </span>
+              )}
             </p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="h-4 w-4" /> Add Client
+          <Button variant="accent" className="gap-2" onClick={handleCreate}>
+            {canCreate ? <Plus className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            Add Client
           </Button>
         </div>
 
-        {/* Search */}
         <div className="mt-6 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -135,7 +151,6 @@ export function CRMPage({ user }: CRMPageProps) {
           />
         </div>
 
-        {/* List */}
         <div className="mt-6">
           <ClientList
             clients={filtered ?? []}

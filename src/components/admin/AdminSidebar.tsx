@@ -1,17 +1,12 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard,
   Users,
-  DollarSign,
-  Briefcase,
-  FileText,
-  Globe,
+  CreditCard,
+  Receipt,
   LogOut,
-  FolderOpen,
-  Kanban,
-  Shield,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,29 +20,19 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useUserRole } from "@/hooks/useUserRole";
 
-const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Boards", url: "/dashboard/boards", icon: Kanban },
-  { title: "Projects", url: "/dashboard/projects", icon: FolderOpen },
-  { title: "CRM", url: "/dashboard/crm", icon: Users },
-  { title: "Finance", url: "/dashboard/finance", icon: DollarSign },
-  { title: "Portals", url: "/dashboard/portals", icon: Briefcase },
-  { title: "Portfolio", url: "/dashboard/portfolio", icon: Globe },
-  { title: "Frameworks", url: "/dashboard/frameworks", icon: FileText },
+const adminNavItems = [
+  { title: "Overview", url: "/admin", icon: LayoutDashboard },
+  { title: "Users", url: "/admin/users", icon: Users },
+  { title: "Memberships", url: "/admin/memberships", icon: CreditCard },
+  { title: "Payment Proofs", url: "/admin/payments", icon: Receipt },
 ];
 
-interface AppSidebarProps {
-  user: User | null;
-}
-
-export function AppSidebar({ user }: AppSidebarProps) {
+export function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
   const location = useLocation();
-  const { data: role } = useUserRole(user?.id);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -60,23 +45,25 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {!collapsed && (
           <div>
             <span className="text-sm font-display font-bold text-foreground">Kraton</span>
-            <span className="text-[10px] text-muted-foreground ml-1.5 uppercase tracking-[0.15em] font-body">OS</span>
+            <span className="text-[10px] text-destructive ml-1.5 uppercase tracking-[0.15em] font-body">Admin</span>
           </div>
         )}
         {collapsed && (
-          <span className="text-sm font-display font-bold text-foreground mx-auto">K</span>
+          <span className="text-sm font-display font-bold text-destructive mx-auto">A</span>
         )}
       </div>
 
       <SidebarContent className="pt-2">
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
-            Workspace
+            Management
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
-                const active = location.pathname === item.url || (item.url !== "/dashboard" && location.pathname.startsWith(item.url));
+              {adminNavItems.map((item) => {
+                const active =
+                  location.pathname === item.url ||
+                  (item.url !== "/admin" && location.pathname.startsWith(item.url));
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -96,31 +83,19 @@ export function AppSidebar({ user }: AppSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {role === "admin" && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
-              Admin
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={() => navigate("/admin")}
-                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150"
-                  >
-                    <Shield className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span className="font-body text-sm">Admin Panel</span>}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-2">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => navigate("/dashboard")}
+              className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150"
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" />
+              {!collapsed && <span className="font-body text-sm">Back to Dashboard</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
