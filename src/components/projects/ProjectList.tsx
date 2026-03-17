@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FolderOpen, Building2, Calendar } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects"> & { clients: { name: string } | null };
