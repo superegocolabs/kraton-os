@@ -42,14 +42,12 @@ export function PortalsPage({ user }: PortalsPageProps) {
     },
   });
 
-  // Clients that don't already have a portal
-  const availableClients = clients?.filter(
-    (c) => !portals?.some((p) => p.client_id === c.id)
-  ) ?? [];
+  // All clients are available (multiple portals per client allowed)
+  const availableClients = clients ?? [];
 
   const createPortal = useMutation({
-    mutationFn: async (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string }) => {
-      const { error } = await supabase.from("client_portals").insert({ ...values, user_id: user!.id });
+    mutationFn: async (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string; access_code: string }) => {
+      const { error } = await supabase.from("client_portals").insert({ ...values, user_id: user!.id } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -178,6 +176,11 @@ export function PortalsPage({ user }: PortalsPageProps) {
                   <p className="text-xs text-muted-foreground font-body mt-1 truncate">
                     /portal/{portal.slug}
                   </p>
+                  {(portal as any).access_code && (
+                    <p className="text-[10px] text-primary font-body mt-0.5 font-mono tracking-wider">
+                      Code: {(portal as any).access_code}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   <button

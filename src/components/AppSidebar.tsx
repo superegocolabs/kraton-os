@@ -12,6 +12,10 @@ import {
   FolderOpen,
   Kanban,
   Shield,
+  StickyNote,
+  Brain,
+  UserCircle,
+  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,17 +29,27 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useState } from "react";
 
-const navItems = [
+const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Boards", url: "/dashboard/boards", icon: Kanban },
   { title: "Projects", url: "/dashboard/projects", icon: FolderOpen },
   { title: "CRM", url: "/dashboard/crm", icon: Users },
   { title: "Finance", url: "/dashboard/finance", icon: DollarSign },
   { title: "Portals", url: "/dashboard/portals", icon: Briefcase },
   { title: "Portfolio", url: "/dashboard/portfolio", icon: Globe },
   { title: "Frameworks", url: "/dashboard/frameworks", icon: FileText },
+];
+
+const brainstormItems = [
+  { title: "Boards", url: "/dashboard/boards", icon: Kanban },
+  { title: "Notes", url: "/dashboard/notes", icon: StickyNote },
 ];
 
 interface AppSidebarProps {
@@ -48,10 +62,35 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: role } = useUserRole(user?.id);
+  const [brainstormOpen, setBrainstormOpen] = useState(
+    location.pathname.includes("/dashboard/boards") || location.pathname.includes("/dashboard/notes")
+  );
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
+  };
+
+  const isActive = (url: string) =>
+    location.pathname === url || (url !== "/dashboard" && location.pathname.startsWith(url));
+
+  const navButton = (item: { title: string; url: string; icon: any }) => {
+    const active = isActive(item.url);
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton
+          onClick={() => navigate(item.url)}
+          className={`transition-colors duration-150 ${
+            active
+              ? "bg-muted text-primary font-medium"
+              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+          }`}
+        >
+          <item.icon className="h-4 w-4 shrink-0" />
+          {!collapsed && <span className="font-body text-sm">{item.title}</span>}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
   };
 
   return (
@@ -75,26 +114,36 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
-                const active = location.pathname === item.url || (item.url !== "/dashboard" && location.pathname.startsWith(item.url));
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.url)}
-                      className={`transition-colors duration-150 ${
-                        active
-                          ? "bg-muted text-primary font-medium"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="font-body text-sm">{item.title}</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {mainNavItems.map(navButton)}
             </SidebarMenu>
           </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Brainstorming dropdown */}
+        <SidebarGroup>
+          {collapsed ? (
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {brainstormItems.map(navButton)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          ) : (
+            <Collapsible open={brainstormOpen} onOpenChange={setBrainstormOpen}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body hover:text-foreground transition-colors">
+                <span className="flex items-center gap-1.5">
+                  <Brain className="h-3 w-3" /> Brainstorming
+                </span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${brainstormOpen ? "rotate-180" : ""}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {brainstormItems.map(navButton)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </SidebarGroup>
 
         {role === "admin" && (
@@ -121,6 +170,19 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <SidebarFooter className="border-t border-border p-2">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => navigate("/dashboard/profile")}
+              className={`transition-colors duration-150 ${
+                isActive("/dashboard/profile")
+                  ? "bg-muted text-primary font-medium"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+              }`}
+            >
+              <UserCircle className="h-4 w-4 shrink-0" />
+              {!collapsed && <span className="font-body text-sm">Profile</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}

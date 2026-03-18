@@ -2,11 +2,12 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X, Send, File } from "lucide-react";
+import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X, Send, File, Lock } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const ClientPortalView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +16,11 @@ const ClientPortalView = () => {
   const [pendingFile, setPendingFile] = useState<{ invoiceId: string; file: File } | null>(null);
   const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // PIN gate state
+  const [pinVerified, setPinVerified] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState(false);
 
   const { data: portal, isLoading: portalLoading } = useQuery({
     queryKey: ["portal", slug],
@@ -31,6 +37,31 @@ const ClientPortalView = () => {
     enabled: !!slug,
   });
 
+  // Get portal owner's PIN
+  const portalUserId = portal?.user_id;
+  const { data: ownerProfile } = useQuery({
+    queryKey: ["portal-owner-pin", portalUserId],
+    queryFn: async () => {
+      // We need to read portal_pin from profiles. Since anon can't read profiles,
+      // we use the access_code on client_portals instead.
+      return null;
+    },
+    enabled: false,
+  });
+
+  // Access code is stored on client_portals directly
+  const accessCode = (portal as any)?.access_code as string | null;
+  const hasPin = !!accessCode && accessCode.length > 0;
+
+  const handlePinSubmit = () => {
+    if (pinInput === accessCode) {
+      setPinVerified(true);
+      setPinError(false);
+    } else {
+      setPinError(true);
+    }
+  };
+
   const clientId = portal?.clients?.id;
 
   const { data: projects } = useQuery({
@@ -44,7 +75,7 @@ const ClientPortalView = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!clientId,
+    enabled: !!clientId && (!hasPin || pinVerified),
   });
 
   const { data: invoices, refetch: refetchInvoices } = useQuery({
@@ -60,7 +91,7 @@ const ClientPortalView = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!clientId,
+    enabled: !!clientId && (!hasPin || pinVerified),
   });
 
   const handleSendProof = async () => {
@@ -77,7 +108,6 @@ const ClientPortalView = () => {
 
       const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(path);
 
-      // Update invoice with proof URL (anon UPDATE policy allows this)
       const { error: updateError } = await supabase
         .from("invoices")
         .update({ payment_proof_url: urlData.publicUrl })
@@ -118,6 +148,58 @@ const ClientPortalView = () => {
   }
 
   const accent = portal.accent_color ?? "#C5A47E";
+
+  // PIN Gate
+  if (hasPin && !pinVerified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="h-1 absolute top-0 left-0 right-0" style={{ backgroundColor: accent }} />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center max-w-sm mx-auto px-6"
+        >
+          <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: accent + "20" }}>
+            <Lock className="h-7 w-7" style={{ color: accent }} />
+          </div>
+          <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: accent }}>
+            {portal.studio_name}
+          </p>
+          <h1 className="text-xl font-bold text-white mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+            Portal Access
+          </h1>
+          <p className="text-sm text-[#888] mb-6">
+            Enter the access code to view this portal.
+          </p>
+          <div className="space-y-3">
+            <Input
+              value={pinInput}
+              onChange={(e) => {
+                setPinInput(e.target.value);
+                setPinError(false);
+              }}
+              placeholder="Access code"
+              className="bg-[#171717] border-[#262626] text-white text-center tracking-[0.3em] focus-visible:ring-0 focus-visible:border-[#C5A47E]"
+              maxLength={6}
+              onKeyDown={(e) => e.key === "Enter" && handlePinSubmit()}
+            />
+            {pinError && (
+              <p className="text-xs text-red-400">Invalid access code. Please try again.</p>
+            )}
+            <Button
+              className="w-full"
+              style={{ backgroundColor: accent, color: "#0A0A0A" }}
+              onClick={handlePinSubmit}
+              disabled={!pinInput}
+            >
+              Enter Portal
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   const fmt = (v: number) => formatCurrency(v);
 
   const statusIcon = (status: string) => {
@@ -137,12 +219,10 @@ const ClientPortalView = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
-      {/* Accent bar */}
       <div className="h-1" style={{ backgroundColor: accent }} />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          {/* Header */}
           <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>
             {portal.studio_name}
           </p>
@@ -250,7 +330,6 @@ const ClientPortalView = () => {
                       </div>
                     </div>
 
-                    {/* Pending file confirmation for this invoice */}
                     {pendingFile?.invoiceId === inv.id && (
                       <div className="mt-3 p-3 bg-[#1a1a1a] border border-[#333] rounded-md">
                         <div className="flex items-center gap-2 text-sm text-white">
@@ -325,7 +404,6 @@ const ClientPortalView = () => {
             className="bg-[#171717] border border-[#262626] rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Invoice Template Header */}
             <div className="p-6 border-b border-[#262626]">
               <div className="flex items-start justify-between">
                 <div>
@@ -343,13 +421,11 @@ const ClientPortalView = () => {
               </div>
             </div>
 
-            {/* Bill To */}
             <div className="p-6 border-b border-[#262626]">
               <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Bill To</p>
               <p className="text-sm font-medium text-white">{portal.clients?.name}</p>
               {portal.clients?.company && <p className="text-xs text-[#888]">{portal.clients.company}</p>}
               {portal.clients?.email && <p className="text-xs text-[#888]">{portal.clients.email}</p>}
-
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {selectedInvoice.due_date && (
                   <div>
@@ -366,7 +442,6 @@ const ClientPortalView = () => {
               </div>
             </div>
 
-            {/* Line Items */}
             {lineItems(selectedInvoice).length > 0 && (
               <div className="p-6 border-b border-[#262626]">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-3">Items</p>
@@ -381,7 +456,6 @@ const ClientPortalView = () => {
               </div>
             )}
 
-            {/* Total */}
             <div className="p-6 border-b border-[#262626]">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-[#888]">Total</span>
@@ -391,7 +465,6 @@ const ClientPortalView = () => {
               </div>
             </div>
 
-            {/* Notes */}
             {selectedInvoice.notes && (
               <div className="p-6 border-b border-[#262626]">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Notes</p>
@@ -399,7 +472,6 @@ const ClientPortalView = () => {
               </div>
             )}
 
-            {/* Payment Proof */}
             {selectedInvoice.payment_proof_url && (
               <div className="p-6 border-b border-[#262626]">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Payment Proof</p>
@@ -409,7 +481,6 @@ const ClientPortalView = () => {
               </div>
             )}
 
-            {/* Upload CTA */}
             {selectedInvoice.status !== "paid" && (
               <div className="p-6">
                 <Button
