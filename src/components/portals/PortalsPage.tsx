@@ -176,6 +176,11 @@ export function PortalsPage({ user }: PortalsPageProps) {
                   <p className="text-xs text-muted-foreground font-body mt-1 truncate">
                     /portal/{portal.slug}
                   </p>
+                  {(portal as any).access_code && (
+                    <p className="text-[10px] text-primary font-body mt-0.5 font-mono tracking-wider">
+                      Code: {(portal as any).access_code}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   <button
