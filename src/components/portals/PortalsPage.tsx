@@ -42,10 +42,8 @@ export function PortalsPage({ user }: PortalsPageProps) {
     },
   });
 
-  // Clients that don't already have a portal
-  const availableClients = clients?.filter(
-    (c) => !portals?.some((p) => p.client_id === c.id)
-  ) ?? [];
+  // All clients are available (multiple portals per client allowed)
+  const availableClients = clients ?? [];
 
   const createPortal = useMutation({
     mutationFn: async (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string; access_code: string }) => {
