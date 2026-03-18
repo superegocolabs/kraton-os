@@ -11,6 +11,8 @@ import { PortalsPage } from "@/components/portals/PortalsPage";
 import { PortfolioPage } from "@/components/portfolio/PortfolioPage";
 import { FrameworksPage } from "@/components/frameworks/FrameworksPage";
 import { BoardsPage } from "@/components/boards/BoardsPage";
+import { NotesPage } from "@/components/notes/NotesPage";
+import { ProfilePage } from "@/components/profile/ProfilePage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -26,7 +28,6 @@ const Dashboard = () => {
           navigate("/auth");
         } else {
           setUser(session.user);
-          // Upsert profile
           supabase.from("profiles").upsert({
             id: session.user.id,
             email: session.user.email,
@@ -65,12 +66,14 @@ const Dashboard = () => {
   const renderContent = () => {
     const path = location.pathname;
     if (path.startsWith("/dashboard/boards")) return <BoardsPage user={user} />;
+    if (path.startsWith("/dashboard/notes")) return <NotesPage user={user} />;
     if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
     if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     if (path.startsWith("/dashboard/projects")) return <ProjectsPage user={user} />;
     if (path.startsWith("/dashboard/portals")) return <PortalsPage user={user} />;
     if (path.startsWith("/dashboard/portfolio")) return <PortfolioPage user={user} />;
     if (path.startsWith("/dashboard/frameworks")) return <FrameworksPage user={user} />;
+    if (path.startsWith("/dashboard/profile")) return <ProfilePage user={user} />;
     return <DashboardContent user={user} />;
   };
 

@@ -8,9 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface CreatePortalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string }) => void;
+  onSubmit: (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string; access_code: string }) => void;
   isSubmitting: boolean;
   clients: { id: string; name: string }[];
+}
+
+function generateCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting, clients }: CreatePortalDialogProps) {
@@ -18,10 +22,11 @@ export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting,
   const [studioName, setStudioName] = useState("Kraton Studio");
   const [welcomeMessage, setWelcomeMessage] = useState("Welcome to your project portal. Here you'll find all updates and deliverables.");
   const [accentColor, setAccentColor] = useState("#C5A47E");
+  const [accessCode, setAccessCode] = useState(() => generateCode());
 
   const selectedClient = clients.find((c) => c.id === clientId);
   const autoSlug = selectedClient
-    ? selectedClient.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+    ? selectedClient.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + accessCode.toLowerCase()
     : "";
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,11 +38,13 @@ export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting,
       studio_name: studioName.trim(),
       welcome_message: welcomeMessage.trim(),
       accent_color: accentColor,
+      access_code: accessCode,
     });
     setClientId("");
     setStudioName("Kraton Studio");
     setWelcomeMessage("Welcome to your project portal. Here you'll find all updates and deliverables.");
     setAccentColor("#C5A47E");
+    setAccessCode(generateCode());
   };
 
   const fieldClass = "bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary font-body";
@@ -69,6 +76,24 @@ export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting,
               <p className="mt-1.5 text-sm text-muted-foreground font-body">/portal/{autoSlug}</p>
             </div>
           )}
+
+          <div>
+            <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Access Code</label>
+            <p className="text-[10px] text-muted-foreground font-body mt-0.5 mb-1">
+              Visitors must enter this code to access the portal.
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <Input
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value.toUpperCase().slice(0, 6))}
+                className={`${fieldClass} max-w-[160px] tracking-[0.2em] font-mono`}
+                maxLength={6}
+              />
+              <Button type="button" variant="ghost" size="sm" className="text-xs font-body" onClick={() => setAccessCode(generateCode())}>
+                Regenerate
+              </Button>
+            </div>
+          </div>
 
           <div>
             <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Studio Name</label>
