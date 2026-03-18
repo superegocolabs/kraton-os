@@ -123,6 +123,7 @@ export type Database = {
       client_portals: {
         Row: {
           accent_color: string | null
+          access_code: string | null
           client_id: string
           created_at: string
           id: string
@@ -135,6 +136,7 @@ export type Database = {
         }
         Insert: {
           accent_color?: string | null
+          access_code?: string | null
           client_id: string
           created_at?: string
           id?: string
@@ -147,6 +149,7 @@ export type Database = {
         }
         Update: {
           accent_color?: string | null
+          access_code?: string | null
           client_id?: string
           created_at?: string
           id?: string
@@ -318,24 +321,54 @@ export type Database = {
         }
         Relationships: []
       }
+      notes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
           email: string | null
           full_name: string | null
           id: string
+          portal_pin: string | null
         }
         Insert: {
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
+          portal_pin?: string | null
         }
         Update: {
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          portal_pin?: string | null
         }
         Relationships: []
       }
