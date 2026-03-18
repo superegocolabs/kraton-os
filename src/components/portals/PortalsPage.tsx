@@ -48,8 +48,8 @@ export function PortalsPage({ user }: PortalsPageProps) {
   ) ?? [];
 
   const createPortal = useMutation({
-    mutationFn: async (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string }) => {
-      const { error } = await supabase.from("client_portals").insert({ ...values, user_id: user!.id });
+    mutationFn: async (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string; access_code: string }) => {
+      const { error } = await supabase.from("client_portals").insert({ ...values, user_id: user!.id } as any);
       if (error) throw error;
     },
     onSuccess: () => {
