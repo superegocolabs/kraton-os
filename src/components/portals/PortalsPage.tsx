@@ -42,8 +42,8 @@ export function PortalsPage({ user }: PortalsPageProps) {
     },
   });
 
-  // All clients are available (multiple portals per client allowed)
-  const availableClients = clients ?? [];
+  // Get client IDs that already have portals
+  const existingClientIds = portals?.map((p) => p.client_id) ?? [];
 
   const createPortal = useMutation({
     mutationFn: async (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string; access_code: string }) => {
@@ -105,7 +105,7 @@ export function PortalsPage({ user }: PortalsPageProps) {
 
   if (editingPortal) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
           <button
             onClick={() => setEditingPortalId(null)}
@@ -125,25 +125,19 @@ export function PortalsPage({ user }: PortalsPageProps) {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Client Portals</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Client Portals</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Create sharable portals for your clients.
             </p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={() => setCreateOpen(true)} disabled={availableClients.length === 0}>
-            <Plus className="h-4 w-4" /> Create Portal
+          <Button variant="accent" className="gap-2 shrink-0" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create Portal</span>
           </Button>
         </div>
-
-        {availableClients.length === 0 && clients && clients.length === 0 && (
-          <div className="mt-4 bg-card border border-border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground font-body">Add clients in CRM first to create portals.</p>
-          </div>
-        )}
 
         {/* Portal Grid */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,63 +153,38 @@ export function PortalsPage({ user }: PortalsPageProps) {
               transition={{ duration: 0.2, delay: i * 0.05 }}
               className="bg-card border border-border rounded-lg p-5 relative group"
             >
-              {/* Color accent bar */}
-              <div
-                className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
-                style={{ backgroundColor: portal.accent_color ?? "#C5A47E" }}
-              />
+              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-lg" style={{ backgroundColor: portal.accent_color ?? "#C5A47E" }} />
 
               <div className="flex items-start justify-between mt-1">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h3 className="text-sm font-display font-semibold text-foreground truncate">
                     {portal.clients?.name ?? "Unknown Client"}
                   </h3>
-                  <p className="text-xs text-muted-foreground font-body mt-0.5">
-                    {portal.studio_name}
-                  </p>
-                  <p className="text-xs text-muted-foreground font-body mt-1 truncate">
-                    /portal/{portal.slug}
-                  </p>
+                  <p className="text-xs text-muted-foreground font-body mt-0.5">{portal.studio_name}</p>
+                  <p className="text-xs text-muted-foreground font-body mt-1 truncate">/portal/{portal.slug}</p>
                   {(portal as any).access_code && (
                     <p className="text-[10px] text-primary font-body mt-0.5 font-mono tracking-wider">
                       Code: {(portal as any).access_code}
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => toggleActive.mutate({ id: portal.id, is_active: !portal.is_active })}
-                    className={`p-1.5 rounded transition-colors duration-150 ${portal.is_active ? "text-green-400 hover:bg-green-500/10" : "text-muted-foreground hover:bg-muted"}`}
-                    title={portal.is_active ? "Active — click to deactivate" : "Inactive — click to activate"}
-                  >
-                    {portal.is_active ? <Power className="h-3.5 w-3.5" /> : <PowerOff className="h-3.5 w-3.5" />}
-                  </button>
-                </div>
+                <button
+                  onClick={() => toggleActive.mutate({ id: portal.id, is_active: !portal.is_active })}
+                  className={`p-1.5 rounded transition-colors duration-150 ${portal.is_active ? "text-green-400 hover:bg-green-500/10" : "text-muted-foreground hover:bg-muted"}`}
+                  title={portal.is_active ? "Active — click to deactivate" : "Inactive — click to activate"}
+                >
+                  {portal.is_active ? <Power className="h-3.5 w-3.5" /> : <PowerOff className="h-3.5 w-3.5" />}
+                </button>
               </div>
 
-              <div className="mt-4 flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 text-xs font-body"
-                  onClick={() => copyLink(portal.slug)}
-                >
+              <div className="mt-4 flex items-center gap-2 flex-wrap">
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs font-body" onClick={() => copyLink(portal.slug)}>
                   <Copy className="h-3 w-3" /> Copy Link
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 text-xs font-body"
-                  onClick={() => window.open(`/portal/${portal.slug}`, "_blank")}
-                >
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs font-body" onClick={() => window.open(`/portal/${portal.slug}`, "_blank")}>
                   <ExternalLink className="h-3 w-3" /> Preview
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5 text-xs font-body text-muted-foreground"
-                  onClick={() => setEditingPortalId(portal.id)}
-                >
+                <Button variant="ghost" size="sm" className="gap-1.5 text-xs font-body text-muted-foreground" onClick={() => setEditingPortalId(portal.id)}>
                   <Settings className="h-3 w-3" /> Settings
                 </Button>
               </div>
@@ -236,7 +205,8 @@ export function PortalsPage({ user }: PortalsPageProps) {
         onOpenChange={setCreateOpen}
         onSubmit={(values) => createPortal.mutate(values)}
         isSubmitting={createPortal.isPending}
-        clients={availableClients}
+        clients={clients ?? []}
+        existingClientIds={existingClientIds}
       />
     </div>
   );

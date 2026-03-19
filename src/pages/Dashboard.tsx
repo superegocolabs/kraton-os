@@ -81,11 +81,11 @@ const Dashboard = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar user={user} />
-        <div className="flex-1 flex flex-col">
-          <header className="h-14 flex items-center border-b border-border px-4">
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="h-14 flex items-center border-b border-border px-4 shrink-0">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-3">
-              <span className="text-xs text-muted-foreground font-body">
+              <span className="text-xs text-muted-foreground font-body truncate max-w-[200px]">
                 {user?.email}
               </span>
             </div>

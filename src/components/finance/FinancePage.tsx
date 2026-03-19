@@ -56,63 +56,37 @@ export function FinancePage({ user }: FinancePageProps) {
 
   const addInvoice = useMutation({
     mutationFn: async (values: InvoiceFormValues) => {
-      const { error } = await supabase.from("invoices").insert({
-        ...values,
-        user_id: user!.id,
-      });
+      const { error } = await supabase.from("invoices").insert({ ...values, user_id: user!.id });
       if (error) throw error;
     },
-    onSuccess: () => {
-      invalidateAll();
-      toast.success("Invoice created.");
-      setAddDialogOpen(false);
-    },
+    onSuccess: () => { invalidateAll(); toast.success("Invoice created."); setAddDialogOpen(false); },
     onError: (err: any) => toast.error(err.message),
   });
 
   const updateInvoice = useMutation({
     mutationFn: async ({ id, values }: { id: string; values: InvoiceFormValues }) => {
-      const { error } = await supabase
-        .from("invoices")
-        .update({ ...values, updated_at: new Date().toISOString() })
-        .eq("id", id);
+      const { error } = await supabase.from("invoices").update({ ...values, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      invalidateAll();
-      toast.success("Invoice updated.");
-      setEditingInvoice(null);
-    },
+    onSuccess: () => { invalidateAll(); toast.success("Invoice updated."); setEditingInvoice(null); },
     onError: (err: any) => toast.error(err.message),
   });
 
   const markAsPaid = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("invoices")
-        .update({ status: "paid", paid_date: new Date().toISOString().split("T")[0], updated_at: new Date().toISOString() })
-        .eq("id", id);
+      const { error } = await supabase.from("invoices").update({ status: "paid", paid_date: new Date().toISOString().split("T")[0], updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      invalidateAll();
-      toast.success("Invoice marked as paid.");
-    },
+    onSuccess: () => { invalidateAll(); toast.success("Invoice marked as paid."); },
     onError: (err: any) => toast.error(err.message),
   });
 
   const toggleHidden = useMutation({
     mutationFn: async ({ id, hidden }: { id: string; hidden: boolean }) => {
-      const { error } = await supabase
-        .from("invoices")
-        .update({ hidden_from_portal: hidden, updated_at: new Date().toISOString() })
-        .eq("id", id);
+      const { error } = await supabase.from("invoices").update({ hidden_from_portal: hidden, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_, { hidden }) => {
-      invalidateAll();
-      toast.success(hidden ? "Invoice hidden from client portal." : "Invoice visible to client.");
-    },
+    onSuccess: (_, { hidden }) => { invalidateAll(); toast.success(hidden ? "Invoice hidden from client portal." : "Invoice visible to client."); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -121,14 +95,10 @@ export function FinancePage({ user }: FinancePageProps) {
       const { error } = await supabase.from("invoices").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      invalidateAll();
-      toast.success("Invoice deleted.");
-    },
+    onSuccess: () => { invalidateAll(); toast.success("Invoice deleted."); },
     onError: (err: any) => toast.error(err.message),
   });
 
-  // Stats
   const totalRevenue = invoices?.filter((i) => i.status === "paid").reduce((s, i) => s + Number(i.amount), 0) ?? 0;
   const pendingAmount = invoices?.filter((i) => i.status === "sent" || i.status === "overdue").reduce((s, i) => s + Number(i.amount), 0) ?? 0;
   const overdueCount = invoices?.filter((i) => i.status === "overdue").length ?? 0;
@@ -137,41 +107,31 @@ export function FinancePage({ user }: FinancePageProps) {
   const fmt = (v: number) => formatCurrency(v);
 
   const filtered = invoices?.filter((inv) => {
-    const matchSearch =
-      inv.invoice_number.toLowerCase().includes(search.toLowerCase()) ||
-      inv.clients?.name?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = inv.invoice_number.toLowerCase().includes(search.toLowerCase()) || inv.clients?.name?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || inv.status === filterStatus;
     return matchSearch && matchStatus;
   });
 
   const handleEditInvoice = (inv: Invoice & { clients: { name: string } | null }) => {
     setEditingInvoice({
-      id: inv.id,
-      invoice_number: inv.invoice_number,
-      amount: Number(inv.amount),
-      client_id: inv.client_id,
-      project_id: inv.project_id,
-      due_date: inv.due_date,
-      status: inv.status,
-      notes: inv.notes,
+      id: inv.id, invoice_number: inv.invoice_number, amount: Number(inv.amount),
+      client_id: inv.client_id, project_id: inv.project_id, due_date: inv.due_date, status: inv.status, notes: inv.notes,
     });
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Finance</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Finance</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">Track invoices and revenue.</p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="h-4 w-4" /> New Invoice
+          <Button variant="accent" className="gap-2 shrink-0" onClick={() => setAddDialogOpen(true)}>
+            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New Invoice</span>
           </Button>
         </div>
 
-        {/* Stats */}
         <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: "Total Revenue", value: fmt(totalRevenue), icon: TrendingUp },
@@ -179,75 +139,38 @@ export function FinancePage({ user }: FinancePageProps) {
             { label: "Overdue", value: String(overdueCount), icon: DollarSign },
             { label: "Paid", value: String(paidCount), icon: CheckCircle2 },
           ].map((s) => (
-            <div key={s.label} className="bg-card border border-border rounded-lg p-4">
+            <div key={s.label} className="bg-card border border-border rounded-lg p-3 md:p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground">{s.label}</span>
                 <s.icon className="h-3.5 w-3.5 text-muted-foreground" />
               </div>
-              <p className="text-xl font-display font-bold text-foreground">{s.value}</p>
+              <p className="text-lg md:text-xl font-display font-bold text-foreground">{s.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Filters */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search invoices..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-card border-border font-body"
-            />
+            <Input placeholder="Search invoices..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card border-border font-body" />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto pb-1">
             {["all", "draft", "sent", "paid", "overdue"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
-                className={`px-3 py-2 text-xs font-body uppercase tracking-wider rounded-md transition-colors duration-150 ${
-                  filterStatus === s
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
+              <button key={s} onClick={() => setFilterStatus(s)}
+                className={`px-3 py-2 text-xs font-body uppercase tracking-wider rounded-md transition-colors duration-150 whitespace-nowrap ${filterStatus === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
                 {s}
               </button>
             ))}
           </div>
         </div>
 
-        {/* List */}
         <div className="mt-4">
-          <InvoiceList
-            invoices={filtered ?? []}
-            isLoading={isLoading}
-            onMarkPaid={(id) => markAsPaid.mutate(id)}
-            onDelete={(id) => deleteInvoice.mutate(id)}
-            onToggleHidden={(id, hidden) => toggleHidden.mutate({ id, hidden })}
-            onEdit={handleEditInvoice}
-          />
+          <InvoiceList invoices={filtered ?? []} isLoading={isLoading} onMarkPaid={(id) => markAsPaid.mutate(id)} onDelete={(id) => deleteInvoice.mutate(id)} onToggleHidden={(id, hidden) => toggleHidden.mutate({ id, hidden })} onEdit={handleEditInvoice} />
         </div>
       </motion.div>
 
-      {/* Add new invoice dialog */}
-      <AddInvoiceDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onSubmit={(values) => addInvoice.mutate(values)}
-        isSubmitting={addInvoice.isPending}
-        clients={clients ?? []}
-      />
-
-      {/* Edit invoice dialog */}
-      <AddInvoiceDialog
-        open={!!editingInvoice}
-        onOpenChange={(open) => { if (!open) setEditingInvoice(null); }}
-        onSubmit={(values) => editingInvoice && updateInvoice.mutate({ id: editingInvoice.id, values })}
-        isSubmitting={updateInvoice.isPending}
-        clients={clients ?? []}
-        initialValues={editingInvoice}
-      />
+      <AddInvoiceDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onSubmit={(values) => addInvoice.mutate(values)} isSubmitting={addInvoice.isPending} clients={clients ?? []} />
+      <AddInvoiceDialog open={!!editingInvoice} onOpenChange={(open) => { if (!open) setEditingInvoice(null); }} onSubmit={(values) => editingInvoice && updateInvoice.mutate({ id: editingInvoice.id, values })} isSubmitting={updateInvoice.isPending} clients={clients ?? []} initialValues={editingInvoice} />
     </div>
   );
 }

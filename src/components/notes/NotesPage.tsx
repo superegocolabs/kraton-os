@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import {
-  Plus, FileText, Trash2, Bold, Italic, Underline, ArrowLeft,
-} from "lucide-react";
+import { Plus, FileText, Trash2, Bold, Italic, Underline, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useMembership, FREE_LIMITS } from "@/hooks/useMembership";
-import { useRef, useCallback, useEffect } from "react";
+import { useMembership } from "@/hooks/useMembership";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface NotesPageProps {
   user: User | null;
@@ -96,7 +97,6 @@ export function NotesPage({ user }: NotesPageProps) {
     editorRef.current?.focus();
   }, []);
 
-  // Auto-save debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleContentChange = useCallback(() => {
     if (!selectedNote || !editorRef.current) return;
@@ -110,7 +110,6 @@ export function NotesPage({ user }: NotesPageProps) {
     }, 800);
   }, [selectedNote, updateNote]);
 
-  // Set editor content when note changes
   useEffect(() => {
     if (editorRef.current && selectedNote) {
       editorRef.current.innerHTML = selectedNote.content ?? "";
@@ -120,7 +119,7 @@ export function NotesPage({ user }: NotesPageProps) {
   // Editor view
   if (selectedNote) {
     return (
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
           <button
             onClick={() => setSelectedNoteId(null)}
@@ -141,41 +140,21 @@ export function NotesPage({ user }: NotesPageProps) {
           />
 
           {/* Toolbar */}
-          <div className="flex items-center gap-1 mt-4 mb-2 border border-border rounded-lg p-1 bg-card w-fit">
-            <button
-              onClick={() => execCommand("bold")}
-              className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              title="Bold"
-            >
+          <div className="flex items-center gap-1 mt-4 mb-2 border border-border rounded-lg p-1 bg-card w-fit overflow-x-auto">
+            <button onClick={() => execCommand("bold")} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Bold">
               <Bold className="h-4 w-4" />
             </button>
-            <button
-              onClick={() => execCommand("italic")}
-              className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              title="Italic"
-            >
+            <button onClick={() => execCommand("italic")} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Italic">
               <Italic className="h-4 w-4" />
             </button>
-            <button
-              onClick={() => execCommand("underline")}
-              className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              title="Underline"
-            >
+            <button onClick={() => execCommand("underline")} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Underline">
               <Underline className="h-4 w-4" />
             </button>
             <div className="w-px h-5 bg-border mx-1" />
-            <button
-              onClick={() => execCommand("insertUnorderedList")}
-              className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors text-xs font-body"
-              title="Bullet List"
-            >
+            <button onClick={() => execCommand("insertUnorderedList")} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors text-xs font-body" title="Bullet List">
               • List
             </button>
-            <button
-              onClick={() => execCommand("insertOrderedList")}
-              className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors text-xs font-body"
-              title="Numbered List"
-            >
+            <button onClick={() => execCommand("insertOrderedList")} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors text-xs font-body" title="Numbered List">
               1. List
             </button>
           </div>
@@ -185,19 +164,32 @@ export function NotesPage({ user }: NotesPageProps) {
             ref={editorRef}
             contentEditable
             onInput={handleContentChange}
-            className="min-h-[400px] bg-card border border-border rounded-lg p-4 font-body text-sm text-foreground focus:outline-none focus:border-primary/40 transition-colors prose prose-invert max-w-none"
+            className="min-h-[300px] md:min-h-[400px] bg-card border border-border rounded-lg p-4 font-body text-sm text-foreground focus:outline-none focus:border-primary/40 transition-colors prose prose-invert max-w-none"
             style={{ lineHeight: 1.7 }}
           />
 
           <div className="mt-3 flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-xs text-destructive hover:text-destructive"
-              onClick={() => deleteNote.mutate(selectedNote.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Delete Note
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-destructive hover:text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" /> Delete Note
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-card border-border">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-display">Delete note?</AlertDialogTitle>
+                  <AlertDialogDescription className="font-body text-muted-foreground">
+                    This will permanently delete "{selectedNote.title}".
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="font-body">Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteNote.mutate(selectedNote.id)} className="bg-destructive text-destructive-foreground font-body">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </motion.div>
       </div>
@@ -206,22 +198,20 @@ export function NotesPage({ user }: NotesPageProps) {
 
   // List view
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Notes</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Notes</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Tulis catatan dan ide.
               {!isMember && (
-                <span className="text-primary ml-2">
-                  ({noteCount}/{NOTE_FREE_LIMIT} notes)
-                </span>
+                <span className="text-primary ml-2">({noteCount}/{NOTE_FREE_LIMIT} notes)</span>
               )}
             </p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={handleCreate} disabled={createNote.isPending}>
-            <Plus className="h-4 w-4" /> New Note
+          <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate} disabled={createNote.isPending}>
+            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New Note</span>
           </Button>
         </div>
 
@@ -244,18 +234,31 @@ export function NotesPage({ user }: NotesPageProps) {
                   onClick={() => setSelectedNoteId(note.id)}
                 >
                   <div className="flex items-start justify-between">
-                    <h3 className="font-display font-bold text-foreground text-sm truncate">
-                      {note.title}
-                    </h3>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNote.mutate(note.id);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <h3 className="font-display font-bold text-foreground text-sm truncate">{note.title}</h3>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-card border-border" onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="font-display">Delete note?</AlertDialogTitle>
+                          <AlertDialogDescription className="font-body text-muted-foreground">
+                            This will permanently delete "{note.title}".
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="font-body">Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteNote.mutate(note.id)} className="bg-destructive text-destructive-foreground font-body">
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                   {preview && (
                     <p className="text-xs text-muted-foreground font-body mt-1.5 line-clamp-3">{preview}</p>
@@ -273,7 +276,6 @@ export function NotesPage({ user }: NotesPageProps) {
   );
 }
 
-// Inline editable title component
 function NoteTitle({ initialTitle, onSave }: { initialTitle: string; onSave: (title: string) => void }) {
   const [title, setTitle] = useState(initialTitle);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

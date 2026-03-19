@@ -9,14 +9,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { BoardDetail } from "./BoardDetail";
 import { useMembership, FREE_LIMITS } from "@/hooks/useMembership";
-import { MembershipGate } from "@/components/MembershipGate";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter as AlertFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 
 interface BoardsPageProps {
@@ -77,12 +76,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
   const selectedBoard = boards?.find((b) => b.id === selectedBoardId);
 
   if (selectedBoard) {
-    return (
-      <BoardDetail
-        board={selectedBoard}
-        onBack={() => setSelectedBoardId(null)}
-      />
-    );
+    return <BoardDetail board={selectedBoard} onBack={() => setSelectedBoardId(null)} />;
   }
 
   const boardCount = boards?.length ?? 0;
@@ -97,30 +91,26 @@ export function BoardsPage({ user }: BoardsPageProps) {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Boards</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Boards</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Kelola task dan workflow dengan kanban board.
               {!isMember && (
-                <span className="text-primary ml-2">
-                  ({boardCount}/{FREE_LIMITS.boards} boards)
-                </span>
+                <span className="text-primary ml-2">({boardCount}/{FREE_LIMITS.boards} boards)</span>
               )}
             </p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={handleCreate}>
-            <Plus className="h-4 w-4" /> New Board
+          <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate}>
+            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New Board</span>
           </Button>
         </div>
 
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground font-body text-sm">
-              Loading...
-            </div>
+            <div className="col-span-full text-center py-12 text-muted-foreground font-body text-sm">Loading...</div>
           ) : boards?.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <Kanban className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -135,23 +125,36 @@ export function BoardsPage({ user }: BoardsPageProps) {
                 onClick={() => setSelectedBoardId(board.id)}
               >
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-display font-bold text-foreground">{board.title}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display font-bold text-foreground truncate">{board.title}</h3>
                     {board.description && (
-                      <p className="text-xs text-muted-foreground font-body mt-1 line-clamp-2">
-                        {board.description}
-                      </p>
+                      <p className="text-xs text-muted-foreground font-body mt-1 line-clamp-2">{board.description}</p>
                     )}
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteBoard.mutate(board.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-card border-border" onClick={(e) => e.stopPropagation()}>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="font-display">Delete board?</AlertDialogTitle>
+                        <AlertDialogDescription className="font-body text-muted-foreground">
+                          This will permanently delete "{board.title}" and all its lists and cards.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertFooter>
+                        <AlertDialogCancel className="font-body">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteBoard.mutate(board.id)} className="bg-destructive text-destructive-foreground font-body">
+                          Delete
+                        </AlertDialogAction>
+                      </AlertFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-body mt-3 uppercase tracking-wider">
                   {new Date(board.created_at).toLocaleDateString("id-ID")}
@@ -169,34 +172,16 @@ export function BoardsPage({ user }: BoardsPageProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">
-                Title
-              </label>
-              <Input
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Board title"
-                className="mt-1.5 bg-transparent border-border font-body"
-              />
+              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Board title" className="mt-1.5 bg-transparent border-border font-body" />
             </div>
             <div>
-              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">
-                Description
-              </label>
-              <Textarea
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Optional description"
-                className="mt-1.5 bg-transparent border-border font-body min-h-[80px]"
-              />
+              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Description</label>
+              <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Optional description" className="mt-1.5 bg-transparent border-border font-body min-h-[80px]" />
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="accent"
-              onClick={() => addBoard.mutate()}
-              disabled={!newTitle.trim() || addBoard.isPending}
-            >
+            <Button variant="accent" onClick={() => addBoard.mutate()} disabled={!newTitle.trim() || addBoard.isPending}>
               Create Board
             </Button>
           </DialogFooter>

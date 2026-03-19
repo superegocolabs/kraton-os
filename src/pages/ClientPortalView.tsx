@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X, Send, File, Lock } from "lucide-react";
+import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X, Send, File, Lock, Download } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -37,19 +37,18 @@ const ClientPortalView = () => {
     enabled: !!slug,
   });
 
-  // Get portal owner's PIN
+  // Get portal owner's brand info
   const portalUserId = portal?.user_id;
   const { data: ownerProfile } = useQuery({
-    queryKey: ["portal-owner-pin", portalUserId],
+    queryKey: ["portal-owner-profile", portalUserId],
     queryFn: async () => {
-      // We need to read portal_pin from profiles. Since anon can't read profiles,
-      // we use the access_code on client_portals instead.
+      // Anon can't read profiles, but we store brand info on portal itself
+      // For now return null; brand info comes from studio_name
       return null;
     },
     enabled: false,
   });
 
-  // Access code is stored on client_portals directly
   const accessCode = (portal as any)?.access_code as string | null;
   const hasPin = !!accessCode && accessCode.length > 0;
 
@@ -105,15 +104,12 @@ const ClientPortalView = () => {
         .from("payment-proofs")
         .upload(path, file, { upsert: true });
       if (uploadError) throw uploadError;
-
       const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(path);
-
       const { error: updateError } = await supabase
         .from("invoices")
         .update({ payment_proof_url: urlData.publicUrl })
         .eq("id", invoiceId);
       if (updateError) throw updateError;
-
       toast.success("Bukti transfer berhasil dikirim! Tim kami akan memverifikasi.");
       setPendingFile(null);
       refetchInvoices();
@@ -122,6 +118,46 @@ const ClientPortalView = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleDownloadPdf = (inv: any) => {
+    // Generate a printable invoice view
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    const items = (() => {
+      try {
+        const parsed = typeof inv.line_items === "string" ? JSON.parse(inv.line_items) : inv.line_items;
+        return Array.isArray(parsed) ? parsed : [];
+      } catch { return []; }
+    })();
+    const itemsHtml = items.map((item: any, i: number) =>
+      `<tr><td style="padding:8px;border-bottom:1px solid #eee">${item.description || item.name || `Item ${i + 1}`}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatCurrency(Number(item.amount || 0))}</td></tr>`
+    ).join("");
+    const accent = portal?.accent_color ?? "#C5A47E";
+    printWindow.document.write(`
+      <!DOCTYPE html><html><head><title>Invoice ${inv.invoice_number}</title>
+      <style>body{font-family:Inter,sans-serif;margin:0;padding:40px;color:#333}
+      .header{border-bottom:3px solid ${accent};padding-bottom:20px;margin-bottom:30px}
+      .brand{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:${accent}}
+      h1{font-size:28px;margin:4px 0}table{width:100%;border-collapse:collapse}
+      .total{font-size:24px;font-weight:bold;text-align:right;margin-top:20px}
+      @media print{body{padding:20px}}</style></head>
+      <body>
+        <div class="header">
+          <p class="brand">${portal?.studio_name ?? ""}</p>
+          <h1>INVOICE</h1>
+          <p>${inv.invoice_number}</p>
+        </div>
+        <p><strong>Bill To:</strong> ${portal?.clients?.name ?? ""}</p>
+        ${inv.due_date ? `<p><strong>Due Date:</strong> ${new Date(inv.due_date).toLocaleDateString()}</p>` : ""}
+        <p><strong>Status:</strong> ${inv.status.toUpperCase()}</p>
+        ${items.length > 0 ? `<table style="margin-top:20px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #333">Description</th><th style="text-align:right;padding:8px;border-bottom:2px solid #333">Amount</th></tr></thead><tbody>${itemsHtml}</tbody></table>` : ""}
+        <div class="total">${formatCurrency(Number(inv.amount))}</div>
+        ${inv.notes ? `<p style="margin-top:30px;color:#888;font-size:12px"><strong>Notes:</strong> ${inv.notes}</p>` : ""}
+        <script>setTimeout(()=>window.print(),500)</script>
+      </body></html>
+    `);
+    printWindow.document.close();
   };
 
   if (portalLoading) {
@@ -134,14 +170,10 @@ const ClientPortalView = () => {
 
   if (!portal) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] px-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-            Portal Not Found
-          </h1>
-          <p className="text-[#888] mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-            This portal may have been deactivated or doesn't exist.
-          </p>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Portal Not Found</h1>
+          <p className="text-[#888] mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>This portal may have been deactivated or doesn't exist.</p>
         </div>
       </div>
     );
@@ -152,46 +184,26 @@ const ClientPortalView = () => {
   // PIN Gate
   if (hasPin && !pinVerified) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] px-4" style={{ fontFamily: 'Inter, sans-serif' }}>
         <div className="h-1 absolute top-0 left-0 right-0" style={{ backgroundColor: accent }} />
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-sm mx-auto px-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm mx-auto w-full">
           <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: accent + "20" }}>
             <Lock className="h-7 w-7" style={{ color: accent }} />
           </div>
-          <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: accent }}>
-            {portal.studio_name}
-          </p>
-          <h1 className="text-xl font-bold text-white mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-            Portal Access
-          </h1>
-          <p className="text-sm text-[#888] mb-6">
-            Enter the access code to view this portal.
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: accent }}>{portal.studio_name}</p>
+          <h1 className="text-xl font-bold text-white mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Portal Access</h1>
+          <p className="text-sm text-[#888] mb-6">Enter the access code to view this portal.</p>
           <div className="space-y-3">
             <Input
               value={pinInput}
-              onChange={(e) => {
-                setPinInput(e.target.value);
-                setPinError(false);
-              }}
+              onChange={(e) => { setPinInput(e.target.value); setPinError(false); }}
               placeholder="Access code"
               className="bg-[#171717] border-[#262626] text-white text-center tracking-[0.3em] focus-visible:ring-0 focus-visible:border-[#C5A47E]"
               maxLength={6}
               onKeyDown={(e) => e.key === "Enter" && handlePinSubmit()}
             />
-            {pinError && (
-              <p className="text-xs text-red-400">Invalid access code. Please try again.</p>
-            )}
-            <Button
-              className="w-full"
-              style={{ backgroundColor: accent, color: "#0A0A0A" }}
-              onClick={handlePinSubmit}
-              disabled={!pinInput}
-            >
+            {pinError && <p className="text-xs text-red-400">Invalid access code. Please try again.</p>}
+            <Button className="w-full" style={{ backgroundColor: accent, color: "#0A0A0A" }} onClick={handlePinSubmit} disabled={!pinInput}>
               Enter Portal
             </Button>
           </div>
@@ -212,21 +224,17 @@ const ClientPortalView = () => {
     try {
       const items = typeof inv.line_items === "string" ? JSON.parse(inv.line_items) : inv.line_items;
       return Array.isArray(items) ? items : [];
-    } catch {
-      return [];
-    }
+    } catch { return []; }
   };
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="h-1" style={{ backgroundColor: accent }} />
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>
-            {portal.studio_name}
-          </p>
-          <h1 className="text-3xl font-bold text-white mt-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>{portal.studio_name}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mt-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             {portal.clients?.name}
           </h1>
           <p className="text-[#888] mt-3 text-sm leading-relaxed max-w-lg">
@@ -234,32 +242,23 @@ const ClientPortalView = () => {
           </p>
 
           {/* Projects */}
-          <div className="mt-12">
+          <div className="mt-10 md:mt-12">
             <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
               <FolderOpen className="h-3.5 w-3.5" /> Projects
             </h2>
             {projects && projects.length > 0 ? (
               <div className="space-y-3">
                 {projects.map((p, i) => (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: i * 0.05 }}
-                    className="bg-[#171717] border border-[#262626] rounded-lg p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                  <motion.div key={p.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
+                    className="bg-[#171717] border border-[#262626] rounded-lg p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         {statusIcon(p.status)}
-                        <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                          {p.name}
-                        </span>
+                        <span className="text-sm font-medium text-white truncate" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.name}</span>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider text-[#888]">{p.status.replace("_", " ")}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[#888] shrink-0">{p.status.replace("_", " ")}</span>
                     </div>
-                    {p.description && (
-                      <p className="text-xs text-[#888] mt-2 leading-relaxed">{p.description}</p>
-                    )}
+                    {p.description && <p className="text-xs text-[#888] mt-2 leading-relaxed">{p.description}</p>}
                   </motion.div>
                 ))}
               </div>
@@ -269,60 +268,34 @@ const ClientPortalView = () => {
           </div>
 
           {/* Invoices */}
-          <div className="mt-12">
+          <div className="mt-10 md:mt-12">
             <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
               <FileText className="h-3.5 w-3.5" /> Invoices
             </h2>
             {invoices && invoices.length > 0 ? (
               <div className="space-y-2">
                 {invoices.map((inv, i) => (
-                  <motion.div
-                    key={inv.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: i * 0.05 }}
-                    className="bg-[#171717] border border-[#262626] rounded-lg p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                  <motion.div key={inv.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
+                    className="bg-[#171717] border border-[#262626] rounded-lg p-4">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-3 min-w-0">
                         {statusIcon(inv.status)}
-                        <div>
-                          <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                            {inv.invoice_number}
-                          </span>
-                          {inv.due_date && (
-                            <p className="text-[10px] text-[#888] mt-0.5">
-                              Due {new Date(inv.due_date).toLocaleDateString()}
-                            </p>
-                          )}
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{inv.invoice_number}</span>
+                          {inv.due_date && <p className="text-[10px] text-[#888] mt-0.5">Due {new Date(inv.due_date).toLocaleDateString()}</p>}
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <span className="text-sm font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                            {fmt(Number(inv.amount))}
-                          </span>
-                          <p className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: inv.status === "paid" ? "#4ade80" : accent }}>
-                            {inv.status}
-                          </p>
+                          <span className="text-sm font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{fmt(Number(inv.amount))}</span>
+                          <p className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: inv.status === "paid" ? "#4ade80" : accent }}>{inv.status}</p>
                         </div>
                         <div className="flex gap-1">
-                          <button
-                            onClick={() => setSelectedInvoice(inv)}
-                            className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white"
-                            title="View details"
-                          >
+                          <button onClick={() => setSelectedInvoice(inv)} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="View details">
                             <Eye className="h-4 w-4" />
                           </button>
                           {inv.status !== "paid" && (
-                            <button
-                              onClick={() => {
-                                setUploadingId(inv.id);
-                                fileInputRef.current?.click();
-                              }}
-                              className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white"
-                              title="Upload bukti transfer"
-                            >
+                            <button onClick={() => { setUploadingId(inv.id); fileInputRef.current?.click(); }} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="Upload bukti transfer">
                               <Upload className="h-4 w-4" />
                             </button>
                           )}
@@ -333,30 +306,15 @@ const ClientPortalView = () => {
                     {pendingFile?.invoiceId === inv.id && (
                       <div className="mt-3 p-3 bg-[#1a1a1a] border border-[#333] rounded-md">
                         <div className="flex items-center gap-2 text-sm text-white">
-                          <File className="h-4 w-4" style={{ color: accent }} />
+                          <File className="h-4 w-4 shrink-0" style={{ color: accent }} />
                           <span className="truncate flex-1">{pendingFile.file.name}</span>
-                          <span className="text-xs text-[#888]">
-                            {(pendingFile.file.size / 1024).toFixed(0)} KB
-                          </span>
+                          <span className="text-xs text-[#888] shrink-0">{(pendingFile.file.size / 1024).toFixed(0)} KB</span>
                         </div>
                         <div className="flex gap-2 mt-2">
-                          <Button
-                            size="sm"
-                            className="flex-1 gap-1.5 text-xs"
-                            style={{ backgroundColor: accent, color: "#0A0A0A" }}
-                            onClick={handleSendProof}
-                            disabled={isSending}
-                          >
-                            <Send className="h-3.5 w-3.5" />
-                            {isSending ? "Mengirim..." : "Kirim"}
+                          <Button size="sm" className="flex-1 gap-1.5 text-xs" style={{ backgroundColor: accent, color: "#0A0A0A" }} onClick={handleSendProof} disabled={isSending}>
+                            <Send className="h-3.5 w-3.5" />{isSending ? "Mengirim..." : "Kirim"}
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-xs border-[#333] text-[#888] hover:text-white hover:bg-[#262626]"
-                            onClick={() => setPendingFile(null)}
-                            disabled={isSending}
-                          >
+                          <Button size="sm" variant="outline" className="text-xs border-[#333] text-[#888] hover:text-white hover:bg-[#262626]" onClick={() => setPendingFile(null)} disabled={isSending}>
                             Batal
                           </Button>
                         </div>
@@ -371,7 +329,7 @@ const ClientPortalView = () => {
           </div>
 
           {/* Footer */}
-          <div className="mt-16 pt-6 border-t border-[#262626]">
+          <div className="mt-12 md:mt-16 pt-6 border-t border-[#262626]">
             <p className="text-[10px] text-[#555] uppercase tracking-[0.15em]">
               Powered by {portal.studio_name} · Built with Kraton
             </p>
@@ -379,40 +337,23 @@ const ClientPortalView = () => {
         </motion.div>
       </div>
 
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*,.pdf"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file && uploadingId) {
-            setPendingFile({ invoiceId: uploadingId, file });
-            setUploadingId(null);
-          }
-          e.target.value = "";
-        }}
-      />
+      <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file && uploadingId) { setPendingFile({ invoiceId: uploadingId, file }); setUploadingId(null); }
+        e.target.value = "";
+      }} />
 
       {/* Invoice Detail Modal */}
       {selectedInvoice && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelectedInvoice(null)}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="bg-[#171717] border border-[#262626] rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-[#262626]">
+            onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 md:p-6 border-b border-[#262626]">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] mb-1" style={{ color: accent }}>
-                    {portal.studio_name}
-                  </p>
-                  <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                    INVOICE
-                  </h2>
+                  <p className="text-[10px] uppercase tracking-[0.25em] mb-1" style={{ color: accent }}>{portal.studio_name}</p>
+                  <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>INVOICE</h2>
                   <p className="text-sm text-[#888] mt-1">{selectedInvoice.invoice_number}</p>
                 </div>
                 <button onClick={() => setSelectedInvoice(null)} className="text-[#888] hover:text-white p-1">
@@ -421,7 +362,7 @@ const ClientPortalView = () => {
               </div>
             </div>
 
-            <div className="p-6 border-b border-[#262626]">
+            <div className="p-4 md:p-6 border-b border-[#262626]">
               <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Bill To</p>
               <p className="text-sm font-medium text-white">{portal.clients?.name}</p>
               {portal.clients?.company && <p className="text-xs text-[#888]">{portal.clients.company}</p>}
@@ -435,15 +376,13 @@ const ClientPortalView = () => {
                 )}
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.15em] text-[#888]">Status</p>
-                  <p className="text-sm mt-0.5 uppercase font-medium" style={{ color: selectedInvoice.status === "paid" ? "#4ade80" : accent }}>
-                    {selectedInvoice.status}
-                  </p>
+                  <p className="text-sm mt-0.5 uppercase font-medium" style={{ color: selectedInvoice.status === "paid" ? "#4ade80" : accent }}>{selectedInvoice.status}</p>
                 </div>
               </div>
             </div>
 
             {lineItems(selectedInvoice).length > 0 && (
-              <div className="p-6 border-b border-[#262626]">
+              <div className="p-4 md:p-6 border-b border-[#262626]">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-3">Items</p>
                 <div className="space-y-2">
                   {lineItems(selectedInvoice).map((item: any, idx: number) => (
@@ -456,46 +395,38 @@ const ClientPortalView = () => {
               </div>
             )}
 
-            <div className="p-6 border-b border-[#262626]">
+            <div className="p-4 md:p-6 border-b border-[#262626]">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-[#888]">Total</span>
-                <span className="text-2xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                  {fmt(Number(selectedInvoice.amount))}
-                </span>
+                <span className="text-2xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{fmt(Number(selectedInvoice.amount))}</span>
               </div>
             </div>
 
             {selectedInvoice.notes && (
-              <div className="p-6 border-b border-[#262626]">
+              <div className="p-4 md:p-6 border-b border-[#262626]">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Notes</p>
                 <p className="text-sm text-[#888] leading-relaxed">{selectedInvoice.notes}</p>
               </div>
             )}
 
             {selectedInvoice.payment_proof_url && (
-              <div className="p-6 border-b border-[#262626]">
+              <div className="p-4 md:p-6 border-b border-[#262626]">
                 <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Payment Proof</p>
-                <a href={selectedInvoice.payment_proof_url} target="_blank" rel="noopener noreferrer" className="text-sm underline" style={{ color: accent }}>
-                  View uploaded proof
-                </a>
+                <a href={selectedInvoice.payment_proof_url} target="_blank" rel="noopener noreferrer" className="text-sm underline" style={{ color: accent }}>View uploaded proof</a>
               </div>
             )}
 
-            {selectedInvoice.status !== "paid" && (
-              <div className="p-6">
-                <Button
-                  variant="outline"
-                  className="w-full gap-2 border-[#262626] text-white hover:bg-[#262626]"
-                  onClick={() => {
-                    setUploadingId(selectedInvoice.id);
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload Bukti Transfer
+            <div className="p-4 md:p-6 flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" className="flex-1 gap-2 border-[#262626] text-white hover:bg-[#262626]" onClick={() => handleDownloadPdf(selectedInvoice)}>
+                <Download className="h-4 w-4" /> Download PDF
+              </Button>
+              {selectedInvoice.status !== "paid" && (
+                <Button variant="outline" className="flex-1 gap-2 border-[#262626] text-white hover:bg-[#262626]"
+                  onClick={() => { setUploadingId(selectedInvoice.id); fileInputRef.current?.click(); }}>
+                  <Upload className="h-4 w-4" /> Upload Bukti Transfer
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </motion.div>
         </div>
       )}

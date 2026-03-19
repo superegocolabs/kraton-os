@@ -350,6 +350,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          brand_logo_url: string | null
+          brand_name: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
@@ -357,6 +359,8 @@ export type Database = {
           portal_pin: string | null
         }
         Insert: {
+          brand_logo_url?: string | null
+          brand_name?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -364,6 +368,8 @@ export type Database = {
           portal_pin?: string | null
         }
         Update: {
+          brand_logo_url?: string | null
+          brand_name?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
