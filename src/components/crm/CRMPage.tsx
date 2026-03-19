@@ -40,10 +40,7 @@ export function CRMPage({ user }: CRMPageProps) {
 
   const addClient = useMutation({
     mutationFn: async (values: { name: string; email: string; phone: string; company: string; status: string }) => {
-      const { error } = await supabase.from("clients").insert({
-        ...values,
-        user_id: user!.id,
-      });
+      const { error } = await supabase.from("clients").insert({ ...values, user_id: user!.id });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -101,7 +98,7 @@ export function CRMPage({ user }: CRMPageProps) {
 
   if (selectedClient) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
           <button
             onClick={() => setSelectedClientId(null)}
@@ -121,42 +118,31 @@ export function CRMPage({ user }: CRMPageProps) {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Clients</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Clients</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Manage your client relationships.
               {!isMember && (
-                <span className="text-primary ml-2">
-                  ({clientCount}/{FREE_LIMITS.clients} clients)
-                </span>
+                <span className="text-primary ml-2">({clientCount}/{FREE_LIMITS.clients} clients)</span>
               )}
             </p>
           </div>
-          <Button variant="accent" className="gap-2" onClick={handleCreate}>
+          <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate}>
             {canCreate ? <Plus className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-            Add Client
+            <span className="hidden sm:inline">Add Client</span>
           </Button>
         </div>
 
         <div className="mt-6 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search clients..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-card border-border font-body"
-          />
+          <Input placeholder="Search clients..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card border-border font-body" />
         </div>
 
         <div className="mt-6">
-          <ClientList
-            clients={filtered ?? []}
-            isLoading={isLoading}
-            onSelect={setSelectedClientId}
-          />
+          <ClientList clients={filtered ?? []} isLoading={isLoading} onSelect={setSelectedClientId} />
         </div>
       </motion.div>
 

@@ -106,7 +106,7 @@ export function ProjectsPage({ user }: ProjectsPageProps) {
 
   if (selectedProject) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
           <button
             onClick={() => setSelectedProjectId(null)}
@@ -127,41 +127,35 @@ export function ProjectsPage({ user }: ProjectsPageProps) {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Projects</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Projects</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Manage your creative projects.
               {!isMember && (
-                <span className="text-primary ml-2">
-                  ({projectCount}/{FREE_LIMITS.projects} projects)
-                </span>
+                <span className="text-primary ml-2">({projectCount}/{FREE_LIMITS.projects} projects)</span>
               )}
             </p>
           </div>
-          <Button
-            variant="accent"
-            className="gap-2"
-            onClick={handleCreate}
-          >
+          <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate}>
             {canCreate ? <Plus className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-            New Project
+            <span className="hidden sm:inline">New Project</span>
           </Button>
         </div>
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search projects..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card border-border font-body" />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto pb-1">
             {["all", "draft", "active", "completed", "on_hold"].map((s) => (
               <button
                 key={s}
                 onClick={() => setFilterStatus(s)}
-                className={`px-3 py-2 text-xs font-body uppercase tracking-wider rounded-md transition-colors duration-150 ${filterStatus === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                className={`px-3 py-2 text-xs font-body uppercase tracking-wider rounded-md transition-colors duration-150 whitespace-nowrap ${filterStatus === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
               >
                 {s.replace("_", " ")}
               </button>

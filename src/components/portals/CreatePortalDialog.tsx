@@ -11,18 +11,22 @@ interface CreatePortalDialogProps {
   onSubmit: (values: { client_id: string; slug: string; studio_name: string; welcome_message: string; accent_color: string; access_code: string }) => void;
   isSubmitting: boolean;
   clients: { id: string; name: string }[];
+  existingClientIds: string[];
 }
 
 function generateCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting, clients }: CreatePortalDialogProps) {
+export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting, clients, existingClientIds }: CreatePortalDialogProps) {
   const [clientId, setClientId] = useState("");
   const [studioName, setStudioName] = useState("Kraton Studio");
   const [welcomeMessage, setWelcomeMessage] = useState("Welcome to your project portal. Here you'll find all updates and deliverables.");
   const [accentColor, setAccentColor] = useState("#C5A47E");
   const [accessCode, setAccessCode] = useState(() => generateCode());
+
+  // Filter out clients that already have a portal
+  const availableClients = clients.filter((c) => !existingClientIds.includes(c.id));
 
   const selectedClient = clients.find((c) => c.id === clientId);
   const autoSlug = selectedClient
@@ -51,29 +55,35 @@ export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border max-w-md">
+      <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-lg">Create Client Portal</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
             <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Client *</label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger className={`mt-1.5 ${fieldClass} border-b`}>
-                <SelectValue placeholder="Select a client" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {availableClients.length === 0 ? (
+              <p className="mt-1.5 text-xs text-muted-foreground font-body">
+                Semua client sudah memiliki portal. Tambahkan client baru di CRM.
+              </p>
+            ) : (
+              <Select value={clientId} onValueChange={setClientId}>
+                <SelectTrigger className={`mt-1.5 ${fieldClass} border-b`}>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  {availableClients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {autoSlug && (
             <div>
               <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Portal URL</label>
-              <p className="mt-1.5 text-sm text-muted-foreground font-body">/portal/{autoSlug}</p>
+              <p className="mt-1.5 text-sm text-muted-foreground font-body break-all">/portal/{autoSlug}</p>
             </div>
           )}
 
@@ -114,23 +124,13 @@ export function CreatePortalDialog({ open, onOpenChange, onSubmit, isSubmitting,
           <div>
             <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Accent Color</label>
             <div className="flex items-center gap-3 mt-1.5">
-              <input
-                type="color"
-                value={accentColor}
-                onChange={(e) => setAccentColor(e.target.value)}
-                className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
-              />
-              <Input
-                value={accentColor}
-                onChange={(e) => setAccentColor(e.target.value)}
-                className={`flex-1 ${fieldClass}`}
-                maxLength={7}
-              />
+              <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent" />
+              <Input value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className={`flex-1 ${fieldClass}`} maxLength={7} />
             </div>
           </div>
 
           <div className="pt-2">
-            <Button type="submit" variant="accent" className="w-full" disabled={isSubmitting || !clientId}>
+            <Button type="submit" variant="accent" className="w-full" disabled={isSubmitting || !clientId || availableClients.length === 0}>
               {isSubmitting ? "Creating..." : "Create Portal"}
             </Button>
           </div>
