@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       board_cards: {
         Row: {
           assignee: string | null
@@ -285,6 +306,42 @@ export type Database = {
           },
         ]
       }
+      membership_settings: {
+        Row: {
+          description: string | null
+          features: Json | null
+          id: string
+          plan_name: string
+          price: number
+          price_label: string | null
+          qris_image_url: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          features?: Json | null
+          id?: string
+          plan_name?: string
+          price?: number
+          price_label?: string | null
+          qris_image_url?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          features?: Json | null
+          id?: string
+          plan_name?: string
+          price?: number
+          price_label?: string | null
+          qris_image_url?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       memberships: {
         Row: {
           created_at: string | null
@@ -293,6 +350,7 @@ export type Database = {
           granted_by: string | null
           id: string
           is_active: boolean | null
+          payment_proof_url: string | null
           plan_name: string | null
           updated_at: string | null
           user_id: string
@@ -304,6 +362,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           is_active?: boolean | null
+          payment_proof_url?: string | null
           plan_name?: string | null
           updated_at?: string | null
           user_id: string
@@ -315,6 +374,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           is_active?: boolean | null
+          payment_proof_url?: string | null
           plan_name?: string | null
           updated_at?: string | null
           user_id?: string
@@ -344,6 +404,36 @@ export type Database = {
           id?: string
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      presentations: {
+        Row: {
+          created_at: string | null
+          id: string
+          slides: Json
+          template: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          slides?: Json
+          template?: string
+          title?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          slides?: Json
+          template?: string
+          title?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
