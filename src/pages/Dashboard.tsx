@@ -13,6 +13,7 @@ import { FrameworksPage } from "@/components/frameworks/FrameworksPage";
 import { BoardsPage } from "@/components/boards/BoardsPage";
 import { NotesPage } from "@/components/notes/NotesPage";
 import { ProfilePage } from "@/components/profile/ProfilePage";
+import { SlideshowPage } from "@/components/slideshow/SlideshowPage";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -22,51 +23,34 @@ const Dashboard = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!session) {
-          navigate("/auth");
-        } else {
-          setUser(session.user);
-          supabase.from("profiles").upsert({
-            id: session.user.id,
-            email: session.user.email,
-            full_name: session.user.user_metadata?.full_name ?? null,
-          }, { onConflict: "id" }).then(() => {});
-        }
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) { navigate("/auth"); }
+      else {
         setUser(session.user);
-        supabase.from("profiles").upsert({
-          id: session.user.id,
-          email: session.user.email,
-          full_name: session.user.user_metadata?.full_name ?? null,
-        }, { onConflict: "id" }).then(() => {});
+        supabase.from("profiles").upsert({ id: session.user.id, email: session.user.email, full_name: session.user.user_metadata?.full_name ?? null }, { onConflict: "id" }).then(() => {});
       }
       setLoading(false);
     });
-
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { navigate("/auth"); }
+      else {
+        setUser(session.user);
+        supabase.from("profiles").upsert({ id: session.user.id, email: session.user.email, full_name: session.user.user_metadata?.full_name ?? null }, { onConflict: "id" }).then(() => {});
+      }
+      setLoading(false);
+    });
     return () => subscription.unsubscribe();
   }, [navigate]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
   const renderContent = () => {
     const path = location.pathname;
     if (path.startsWith("/dashboard/boards")) return <BoardsPage user={user} />;
     if (path.startsWith("/dashboard/notes")) return <NotesPage user={user} />;
+    if (path.startsWith("/dashboard/slideshow")) return <SlideshowPage user={user} />;
     if (path.startsWith("/dashboard/crm")) return <CRMPage user={user} />;
     if (path.startsWith("/dashboard/finance")) return <FinancePage user={user} />;
     if (path.startsWith("/dashboard/projects")) return <ProjectsPage user={user} />;
@@ -85,14 +69,10 @@ const Dashboard = () => {
           <header className="h-14 flex items-center border-b border-border px-4 shrink-0">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-3">
-              <span className="text-xs text-muted-foreground font-body truncate max-w-[200px]">
-                {user?.email}
-              </span>
+              <span className="text-xs text-muted-foreground font-body truncate max-w-[200px]">{user?.email}</span>
             </div>
           </header>
-          <main className="flex-1 overflow-auto">
-            {renderContent()}
-          </main>
+          <main className="flex-1 overflow-auto">{renderContent()}</main>
         </div>
       </div>
     </SidebarProvider>
