@@ -1,24 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { LayoutDashboard, Users, CreditCard, Receipt, LogOut, ArrowLeft, Settings } from "lucide-react";
 import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  Receipt,
-  LogOut,
-  ArrowLeft,
-} from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
 const adminNavItems = [
@@ -26,6 +11,7 @@ const adminNavItems = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Memberships", url: "/admin/memberships", icon: CreditCard },
   { title: "Payment Proofs", url: "/admin/payments", icon: Receipt },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -34,46 +20,27 @@ export function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
+  const handleSignOut = async () => { await supabase.auth.signOut(); navigate("/auth"); };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
       <div className="h-14 flex items-center px-4 border-b border-border">
-        {!collapsed && (
-          <div>
-            <span className="text-sm font-display font-bold text-foreground">Kraton</span>
-            <span className="text-[10px] text-destructive ml-1.5 uppercase tracking-[0.15em] font-body">Admin</span>
-          </div>
-        )}
-        {collapsed && (
+        {!collapsed ? (
+          <div><span className="text-sm font-display font-bold text-foreground">Kraton</span><span className="text-[10px] text-destructive ml-1.5 uppercase tracking-[0.15em] font-body">Admin</span></div>
+        ) : (
           <span className="text-sm font-display font-bold text-destructive mx-auto">A</span>
         )}
       </div>
-
       <SidebarContent className="pt-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
-            Management
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {adminNavItems.map((item) => {
-                const active =
-                  location.pathname === item.url ||
-                  (item.url !== "/admin" && location.pathname.startsWith(item.url));
+                const active = location.pathname === item.url || (item.url !== "/admin" && location.pathname.startsWith(item.url));
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.url)}
-                      className={`transition-colors duration-150 ${
-                        active
-                          ? "bg-muted text-primary font-medium"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
-                      }`}
-                    >
+                    <SidebarMenuButton onClick={() => navigate(item.url)} className={`transition-colors duration-150 ${active ? "bg-muted text-primary font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"}`}>
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span className="font-body text-sm">{item.title}</span>}
                     </SidebarMenuButton>
@@ -84,23 +51,16 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className="border-t border-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => navigate("/dashboard")}
-              className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150"
-            >
+            <SidebarMenuButton onClick={() => navigate("/dashboard")} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150">
               <ArrowLeft className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="font-body text-sm">Back to Dashboard</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleSignOut}
-              className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150"
-            >
+            <SidebarMenuButton onClick={handleSignOut} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150">
               <LogOut className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="font-body text-sm">Sign Out</span>}
             </SidebarMenuButton>

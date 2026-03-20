@@ -10,17 +10,8 @@ interface MembershipGateProps {
   onUpgrade?: () => void;
 }
 
-export function MembershipGate({
-  currentCount,
-  limit,
-  isMember,
-  featureName,
-  children,
-  onUpgrade,
-}: MembershipGateProps) {
-  if (isMember || currentCount < limit) {
-    return <>{children}</>;
-  }
+export function MembershipGate({ currentCount, limit, isMember, featureName, children, onUpgrade }: MembershipGateProps) {
+  if (isMember || currentCount < limit) return <>{children}</>;
 
   return (
     <div className="relative">
@@ -30,18 +21,11 @@ export function MembershipGate({
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <Lock className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-lg font-display font-bold text-foreground mb-2">
-            Upgrade Membership
-          </h3>
+          <h3 className="text-lg font-display font-bold text-foreground mb-2">Upgrade Membership</h3>
           <p className="text-sm text-muted-foreground font-body mb-4">
-            Anda sudah mencapai batas {limit} {featureName} untuk akun gratis.
-            Upgrade membership untuk menambah lebih banyak.
+            You've reached the limit of {limit} {featureName} on the free plan. Upgrade your membership to add more.
           </p>
-          {onUpgrade && (
-            <Button variant="accent" onClick={onUpgrade}>
-              Upgrade Sekarang
-            </Button>
-          )}
+          {onUpgrade && <Button variant="accent" onClick={onUpgrade}>Upgrade Now</Button>}
         </div>
       </div>
     </div>
