@@ -7,6 +7,7 @@ import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminUsersPage } from "@/components/admin/AdminUsersPage";
 import { AdminMembershipsPage } from "@/components/admin/AdminMembershipsPage";
 import { AdminPaymentProofsPage } from "@/components/admin/AdminPaymentProofsPage";
+import { AdminSettingsPage } from "@/components/admin/AdminSettingsPage";
 import { User } from "@supabase/supabase-js";
 
 const AdminDashboard = () => {
@@ -19,44 +20,20 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
+      if (!session) { navigate("/auth"); return; }
       setUser(session.user);
-
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!roleData) {
-        navigate("/dashboard");
-        return;
-      }
+      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin").maybeSingle();
+      if (!roleData) { navigate("/dashboard"); return; }
       setIsAdmin(true);
       setLoading(false);
     };
-
     checkAdminAccess();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!session) navigate("/auth");
-      }
-    );
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate("/auth"); });
     return () => subscription.unsubscribe();
   }, [navigate]);
 
   if (loading || !isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
   const renderContent = () => {
@@ -64,6 +41,7 @@ const AdminDashboard = () => {
     if (path.startsWith("/admin/users")) return <AdminUsersPage />;
     if (path.startsWith("/admin/memberships")) return <AdminMembershipsPage user={user} />;
     if (path.startsWith("/admin/payments")) return <AdminPaymentProofsPage />;
+    if (path.startsWith("/admin/settings")) return <AdminSettingsPage user={user} />;
     return <AdminOverview />;
   };
 
@@ -75,12 +53,8 @@ const AdminDashboard = () => {
           <header className="h-14 flex items-center border-b border-border px-4">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-3">
-              <span className="text-[10px] text-destructive uppercase tracking-wider font-body font-medium">
-                Admin
-              </span>
-              <span className="text-xs text-muted-foreground font-body">
-                {user?.email}
-              </span>
+              <span className="text-[10px] text-destructive uppercase tracking-wider font-body font-medium">Admin</span>
+              <span className="text-xs text-muted-foreground font-body">{user?.email}</span>
             </div>
           </header>
           <main className="flex-1 overflow-auto">{renderContent()}</main>

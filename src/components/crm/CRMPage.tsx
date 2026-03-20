@@ -14,10 +14,7 @@ import { useMembership, FREE_LIMITS } from "@/hooks/useMembership";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Client = Tables<"clients">;
-
-interface CRMPageProps {
-  user: User | null;
-}
+interface CRMPageProps { user: User | null; }
 
 export function CRMPage({ user }: CRMPageProps) {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -29,10 +26,7 @@ export function CRMPage({ user }: CRMPageProps) {
   const { data: clients, isLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("clients")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("clients").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       return data as Client[];
     },
@@ -43,26 +37,13 @@ export function CRMPage({ user }: CRMPageProps) {
       const { error } = await supabase.from("clients").insert({ ...values, user_id: user!.id });
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", "count"] });
-      toast.success("Client added successfully.");
-      setAddDialogOpen(false);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["clients"] }); queryClient.invalidateQueries({ queryKey: ["clients", "count"] }); toast.success("Client added."); setAddDialogOpen(false); },
     onError: (err: any) => toast.error(err.message),
   });
 
   const deleteClient = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("clients").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", "count"] });
-      toast.success("Client deleted.");
-      setSelectedClientId(null);
-    },
+    mutationFn: async (id: string) => { const { error } = await supabase.from("clients").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["clients"] }); toast.success("Client deleted."); setSelectedClientId(null); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -71,28 +52,17 @@ export function CRMPage({ user }: CRMPageProps) {
       const { error } = await supabase.from("clients").update({ ...values, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast.success("Client updated.");
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["clients"] }); toast.success("Client updated."); },
     onError: (err: any) => toast.error(err.message),
   });
 
-  const filtered = clients?.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase()) ||
-    c.company?.toLowerCase().includes(search.toLowerCase())
-  );
-
+  const filtered = clients?.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.email?.toLowerCase().includes(search.toLowerCase()) || c.company?.toLowerCase().includes(search.toLowerCase()));
   const selectedClient = clients?.find((c) => c.id === selectedClientId);
   const clientCount = clients?.length ?? 0;
   const canCreate = isMember || clientCount < FREE_LIMITS.clients;
 
   const handleCreate = () => {
-    if (!canCreate) {
-      toast.error("Upgrade membership untuk menambah client lebih banyak.");
-      return;
-    }
+    if (!canCreate) { toast.error("Upgrade your membership to add more clients."); return; }
     setAddDialogOpen(true);
   };
 
@@ -100,18 +70,10 @@ export function CRMPage({ user }: CRMPageProps) {
     return (
       <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-          <button
-            onClick={() => setSelectedClientId(null)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 font-body mb-6"
-          >
+          <button onClick={() => setSelectedClientId(null)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 font-body mb-6">
             <ArrowLeft className="h-4 w-4" /> Back to Clients
           </button>
-          <ClientDetail
-            client={selectedClient}
-            onUpdate={(values) => updateClient.mutate({ id: selectedClient.id, ...values })}
-            onDelete={() => deleteClient.mutate(selectedClient.id)}
-            isUpdating={updateClient.isPending}
-          />
+          <ClientDetail client={selectedClient} onUpdate={(values) => updateClient.mutate({ id: selectedClient.id, ...values })} onDelete={() => deleteClient.mutate(selectedClient.id)} isUpdating={updateClient.isPending} />
         </motion.div>
       </div>
     );
@@ -125,9 +87,7 @@ export function CRMPage({ user }: CRMPageProps) {
             <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Clients</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Manage your client relationships.
-              {!isMember && (
-                <span className="text-primary ml-2">({clientCount}/{FREE_LIMITS.clients} clients)</span>
-              )}
+              {!isMember && <span className="text-primary ml-2">({clientCount}/{FREE_LIMITS.clients} clients)</span>}
             </p>
           </div>
           <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate}>
@@ -135,23 +95,13 @@ export function CRMPage({ user }: CRMPageProps) {
             <span className="hidden sm:inline">Add Client</span>
           </Button>
         </div>
-
         <div className="mt-6 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search clients..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card border-border font-body" />
         </div>
-
-        <div className="mt-6">
-          <ClientList clients={filtered ?? []} isLoading={isLoading} onSelect={setSelectedClientId} />
-        </div>
+        <div className="mt-6"><ClientList clients={filtered ?? []} isLoading={isLoading} onSelect={setSelectedClientId} /></div>
       </motion.div>
-
-      <AddClientDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onSubmit={(values) => addClient.mutate(values)}
-        isSubmitting={addClient.isPending}
-      />
+      <AddClientDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onSubmit={(values) => addClient.mutate(values)} isSubmitting={addClient.isPending} />
     </div>
   );
 }
