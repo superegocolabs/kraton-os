@@ -3,7 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Plus, Kanban, Trash2 } from "lucide-react";
+import { Plus, Kanban, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -21,6 +21,8 @@ interface BoardsPageProps { user: User | null; }
 export function BoardsPage({ user }: BoardsPageProps) {
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingBoard, setEditingBoard] = useState<any | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const queryClient = useQueryClient();
@@ -44,6 +46,15 @@ export function BoardsPage({ user }: BoardsPageProps) {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const updateBoard = useMutation({
+    mutationFn: async ({ id, title, description }: { id: string; title: string; description: string | null }) => {
+      const { error } = await supabase.from("boards").update({ title, description, updated_at: new Date().toISOString() }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["boards"] }); toast.success("Board updated."); setEditDialogOpen(false); setEditingBoard(null); },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const deleteBoard = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("boards").delete().eq("id", id); if (error) throw error; },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["boards"] }); toast.success("Board deleted."); },
@@ -58,6 +69,14 @@ export function BoardsPage({ user }: BoardsPageProps) {
   const handleCreate = () => {
     if (!canCreate) { toast.error("Upgrade your membership to create more boards."); return; }
     setAddDialogOpen(true);
+  };
+
+  const handleEdit = (e: React.MouseEvent, board: any) => {
+    e.stopPropagation();
+    setEditingBoard(board);
+    setNewTitle(board.title);
+    setNewDesc(board.description ?? "");
+    setEditDialogOpen(true);
   };
 
   return (
@@ -93,23 +112,28 @@ export function BoardsPage({ user }: BoardsPageProps) {
                     <h3 className="font-display font-bold text-foreground truncate">{board.title}</h3>
                     {board.description && <p className="text-xs text-muted-foreground font-body mt-1 line-clamp-2">{board.description}</p>}
                   </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button onClick={(e) => e.stopPropagation()} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-card border-border" onClick={(e) => e.stopPropagation()}>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="font-display">Delete board?</AlertDialogTitle>
-                        <AlertDialogDescription className="font-body text-muted-foreground">This will permanently delete "{board.title}" and all its lists and cards.</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertFooter>
-                        <AlertDialogCancel className="font-body">Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteBoard.mutate(board.id)} className="bg-destructive text-destructive-foreground font-body">Delete</AlertDialogAction>
-                      </AlertFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={(e) => handleEdit(e, board)} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button onClick={(e) => e.stopPropagation()} className="text-muted-foreground hover:text-destructive transition-colors p-1">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-card border-border" onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="font-display">Delete board?</AlertDialogTitle>
+                          <AlertDialogDescription className="font-body text-muted-foreground">This will permanently delete "{board.title}" and all its lists and cards.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertFooter>
+                          <AlertDialogCancel className="font-body">Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteBoard.mutate(board.id)} className="bg-destructive text-destructive-foreground font-body">Delete</AlertDialogAction>
+                        </AlertFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-body mt-3 uppercase tracking-wider">{new Date(board.created_at).toLocaleDateString()}</p>
               </motion.div>
@@ -117,6 +141,8 @@ export function BoardsPage({ user }: BoardsPageProps) {
           )}
         </div>
       </motion.div>
+
+      {/* Create dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle className="font-display">New Board</DialogTitle></DialogHeader>
@@ -132,6 +158,26 @@ export function BoardsPage({ user }: BoardsPageProps) {
           </div>
           <DialogFooter>
             <Button variant="accent" onClick={() => addBoard.mutate()} disabled={!newTitle.trim() || addBoard.isPending}>Create Board</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setEditDialogOpen(false); setEditingBoard(null); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle className="font-display">Edit Board</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Board title" className="mt-1.5 bg-transparent border-border font-body" />
+            </div>
+            <div>
+              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Description</label>
+              <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Optional description" className="mt-1.5 bg-transparent border-border font-body min-h-[80px]" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="accent" onClick={() => editingBoard && updateBoard.mutate({ id: editingBoard.id, title: newTitle.trim(), description: newDesc.trim() || null })} disabled={!newTitle.trim() || updateBoard.isPending}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -37,17 +37,25 @@ const ClientPortalView = () => {
     enabled: !!slug,
   });
 
-  // Get portal owner's brand info
+  // Get portal owner's brand info from profiles
   const portalUserId = portal?.user_id;
   const { data: ownerProfile } = useQuery({
     queryKey: ["portal-owner-profile", portalUserId],
     queryFn: async () => {
-      // Anon can't read profiles, but we store brand info on portal itself
-      // For now return null; brand info comes from studio_name
-      return null;
+      if (!portalUserId) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("brand_name, brand_logo_url, full_name")
+        .eq("id", portalUserId)
+        .maybeSingle();
+      if (error) return null;
+      return data;
     },
-    enabled: false,
+    enabled: !!portalUserId,
   });
+
+  const brandName = (ownerProfile as any)?.brand_name || portal?.studio_name || "";
+  const brandLogoUrl = (ownerProfile as any)?.brand_logo_url || "";
 
   const accessCode = (portal as any)?.access_code as string | null;
   const hasPin = !!accessCode && accessCode.length > 0;
@@ -110,18 +118,17 @@ const ClientPortalView = () => {
         .update({ payment_proof_url: urlData.publicUrl })
         .eq("id", invoiceId);
       if (updateError) throw updateError;
-      toast.success("Bukti transfer berhasil dikirim! Tim kami akan memverifikasi.");
+      toast.success("Payment proof submitted successfully!");
       setPendingFile(null);
       refetchInvoices();
     } catch (err: any) {
-      toast.error("Gagal mengirim: " + err.message);
+      toast.error("Failed to send: " + err.message);
     } finally {
       setIsSending(false);
     }
   };
 
   const handleDownloadPdf = (inv: any) => {
-    // Generate a printable invoice view
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
     const items = (() => {
@@ -134,6 +141,7 @@ const ClientPortalView = () => {
       `<tr><td style="padding:8px;border-bottom:1px solid #eee">${item.description || item.name || `Item ${i + 1}`}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatCurrency(Number(item.amount || 0))}</td></tr>`
     ).join("");
     const accent = portal?.accent_color ?? "#C5A47E";
+    const logoHtml = brandLogoUrl ? `<img src="${brandLogoUrl}" style="height:40px;margin-bottom:8px;" />` : "";
     printWindow.document.write(`
       <!DOCTYPE html><html><head><title>Invoice ${inv.invoice_number}</title>
       <style>body{font-family:Inter,sans-serif;margin:0;padding:40px;color:#333}
@@ -144,7 +152,8 @@ const ClientPortalView = () => {
       @media print{body{padding:20px}}</style></head>
       <body>
         <div class="header">
-          <p class="brand">${portal?.studio_name ?? ""}</p>
+          ${logoHtml}
+          <p class="brand">${brandName}</p>
           <h1>INVOICE</h1>
           <p>${inv.invoice_number}</p>
         </div>
@@ -187,10 +196,13 @@ const ClientPortalView = () => {
       <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] px-4" style={{ fontFamily: 'Inter, sans-serif' }}>
         <div className="h-1 absolute top-0 left-0 right-0" style={{ backgroundColor: accent }} />
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm mx-auto w-full">
+          {brandLogoUrl && (
+            <img src={brandLogoUrl} alt="Brand" className="h-12 mx-auto mb-4 object-contain" />
+          )}
           <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: accent + "20" }}>
             <Lock className="h-7 w-7" style={{ color: accent }} />
           </div>
-          <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: accent }}>{portal.studio_name}</p>
+          <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: accent }}>{brandName}</p>
           <h1 className="text-xl font-bold text-white mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Portal Access</h1>
           <p className="text-sm text-[#888] mb-6">Enter the access code to view this portal.</p>
           <div className="space-y-3">
@@ -214,6 +226,19 @@ const ClientPortalView = () => {
 
   const fmt = (v: number) => formatCurrency(v);
 
+  const projectStatusColor = (status: string) => {
+    if (status === "completed") return "#4ade80";
+    if (status === "active" || status === "in_progress") return accent;
+    return "#888";
+  };
+
+  const projectStatusLabel = (status: string) => {
+    if (status === "completed") return "Complete";
+    if (status === "active" || status === "in_progress") return "In Progress";
+    if (status === "on_hold") return "On Hold";
+    return status.replace("_", " ");
+  };
+
   const statusIcon = (status: string) => {
     if (status === "completed" || status === "paid") return <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />;
     if (status === "active" || status === "sent") return <Clock className="h-3.5 w-3.5" style={{ color: accent }} />;
@@ -231,34 +256,51 @@ const ClientPortalView = () => {
     <div className="min-h-screen bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="h-1" style={{ backgroundColor: accent }} />
 
-      <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>{portal.studio_name}</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mt-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-            {portal.clients?.name}
-          </h1>
+          {/* Header with brand */}
+          <div className="flex items-center gap-4 mb-2">
+            {brandLogoUrl && (
+              <img src={brandLogoUrl} alt="Brand" className="h-10 w-10 rounded-lg object-contain border border-[#262626]" />
+            )}
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>{brandName}</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-white mt-1" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                Welcome, {portal.clients?.name}
+              </h1>
+            </div>
+          </div>
           <p className="text-[#888] mt-3 text-sm leading-relaxed max-w-lg">
             {String(portal.welcome_message ?? "").replace(/<[^>]*>/g, "")}
           </p>
 
-          {/* Projects */}
+          {/* Projects with status badges */}
           <div className="mt-10 md:mt-12">
             <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
               <FolderOpen className="h-3.5 w-3.5" /> Projects
             </h2>
             {projects && projects.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {projects.map((p, i) => (
                   <motion.div key={p.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
                     className="bg-[#171717] border border-[#262626] rounded-lg p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {statusIcon(p.status)}
-                        <span className="text-sm font-medium text-white truncate" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.name}</span>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wider text-[#888] shrink-0">{p.status.replace("_", " ")}</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-medium" style={{
+                        backgroundColor: projectStatusColor(p.status) + "20",
+                        color: projectStatusColor(p.status),
+                      }}>
+                        {projectStatusLabel(p.status)}
+                      </span>
                     </div>
                     {p.description && <p className="text-xs text-[#888] mt-2 leading-relaxed">{p.description}</p>}
+                    {(p.start_date || p.end_date) && (
+                      <p className="text-[10px] text-[#555] mt-2">
+                        {p.start_date && new Date(p.start_date).toLocaleDateString()}
+                        {p.start_date && p.end_date && " — "}
+                        {p.end_date && new Date(p.end_date).toLocaleDateString()}
+                      </p>
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -273,33 +315,36 @@ const ClientPortalView = () => {
               <FileText className="h-3.5 w-3.5" /> Invoices
             </h2>
             {invoices && invoices.length > 0 ? (
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {invoices.map((inv, i) => (
                   <motion.div key={inv.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
                     className="bg-[#171717] border border-[#262626] rounded-lg p-4">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {statusIcon(inv.status)}
-                        <div className="min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 shrink-0" style={{ color: accent }} />
                           <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{inv.invoice_number}</span>
-                          {inv.due_date && <p className="text-[10px] text-[#888] mt-0.5">Due {new Date(inv.due_date).toLocaleDateString()}</p>}
                         </div>
+                        {inv.due_date && <p className="text-[10px] text-[#555] mt-1">Due {new Date(inv.due_date).toLocaleDateString()}</p>}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <span className="text-sm font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{fmt(Number(inv.amount))}</span>
-                          <p className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: inv.status === "paid" ? "#4ade80" : accent }}>{inv.status}</p>
-                        </div>
-                        <div className="flex gap-1">
-                          <button onClick={() => setSelectedInvoice(inv)} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="View details">
-                            <Eye className="h-4 w-4" />
+                      <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-medium" style={{
+                        backgroundColor: inv.status === "paid" ? "#4ade8020" : accent + "20",
+                        color: inv.status === "paid" ? "#4ade80" : accent,
+                      }}>
+                        {inv.status === "paid" ? "Paid" : inv.status === "sent" ? "Pending" : inv.status}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-sm font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{fmt(Number(inv.amount))}</span>
+                      <div className="flex gap-1">
+                        <button onClick={() => setSelectedInvoice(inv)} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="View details">
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        {inv.status !== "paid" && (
+                          <button onClick={() => { setUploadingId(inv.id); fileInputRef.current?.click(); }} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="Upload payment proof">
+                            <Upload className="h-4 w-4" />
                           </button>
-                          {inv.status !== "paid" && (
-                            <button onClick={() => { setUploadingId(inv.id); fileInputRef.current?.click(); }} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="Upload bukti transfer">
-                              <Upload className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
 
@@ -312,10 +357,10 @@ const ClientPortalView = () => {
                         </div>
                         <div className="flex gap-2 mt-2">
                           <Button size="sm" className="flex-1 gap-1.5 text-xs" style={{ backgroundColor: accent, color: "#0A0A0A" }} onClick={handleSendProof} disabled={isSending}>
-                            <Send className="h-3.5 w-3.5" />{isSending ? "Mengirim..." : "Kirim"}
+                            <Send className="h-3.5 w-3.5" />{isSending ? "Sending..." : "Send"}
                           </Button>
                           <Button size="sm" variant="outline" className="text-xs border-[#333] text-[#888] hover:text-white hover:bg-[#262626]" onClick={() => setPendingFile(null)} disabled={isSending}>
-                            Batal
+                            Cancel
                           </Button>
                         </div>
                       </div>
@@ -331,7 +376,7 @@ const ClientPortalView = () => {
           {/* Footer */}
           <div className="mt-12 md:mt-16 pt-6 border-t border-[#262626]">
             <p className="text-[10px] text-[#555] uppercase tracking-[0.15em]">
-              Powered by {portal.studio_name} · Built with Kraton
+              Powered by {brandName} · Built with Kraton
             </p>
           </div>
         </motion.div>
@@ -351,10 +396,13 @@ const ClientPortalView = () => {
             onClick={(e) => e.stopPropagation()}>
             <div className="p-4 md:p-6 border-b border-[#262626]">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] mb-1" style={{ color: accent }}>{portal.studio_name}</p>
-                  <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>INVOICE</h2>
-                  <p className="text-sm text-[#888] mt-1">{selectedInvoice.invoice_number}</p>
+                <div className="flex items-center gap-3">
+                  {brandLogoUrl && <img src={brandLogoUrl} alt="Brand" className="h-8 object-contain" />}
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.25em] mb-1" style={{ color: accent }}>{brandName}</p>
+                    <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>INVOICE</h2>
+                    <p className="text-sm text-[#888] mt-1">{selectedInvoice.invoice_number}</p>
+                  </div>
                 </div>
                 <button onClick={() => setSelectedInvoice(null)} className="text-[#888] hover:text-white p-1">
                   <X className="h-5 w-5" />
@@ -423,7 +471,7 @@ const ClientPortalView = () => {
               {selectedInvoice.status !== "paid" && (
                 <Button variant="outline" className="flex-1 gap-2 border-[#262626] text-white hover:bg-[#262626]"
                   onClick={() => { setUploadingId(selectedInvoice.id); fileInputRef.current?.click(); }}>
-                  <Upload className="h-4 w-4" /> Upload Bukti Transfer
+                  <Upload className="h-4 w-4" /> Upload Payment Proof
                 </Button>
               )}
             </div>
