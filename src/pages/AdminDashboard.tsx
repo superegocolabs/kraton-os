@@ -8,6 +8,8 @@ import { AdminUsersPage } from "@/components/admin/AdminUsersPage";
 import { AdminMembershipsPage } from "@/components/admin/AdminMembershipsPage";
 import { AdminPaymentProofsPage } from "@/components/admin/AdminPaymentProofsPage";
 import { AdminSettingsPage } from "@/components/admin/AdminSettingsPage";
+import { AdminFeedbackPage } from "@/components/admin/AdminFeedbackPage";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { User } from "@supabase/supabase-js";
 
 const AdminDashboard = () => {

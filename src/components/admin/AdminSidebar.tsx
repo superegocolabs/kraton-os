@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, CreditCard, Receipt, LogOut, ArrowLeft, Settings } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, Receipt, LogOut, ArrowLeft, Settings, MessageSquare } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
@@ -11,6 +11,7 @@ const adminNavItems = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Memberships", url: "/admin/memberships", icon: CreditCard },
   { title: "Payment Proofs", url: "/admin/payments", icon: Receipt },
+  { title: "Client Feedback", url: "/admin/feedback", icon: MessageSquare },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
