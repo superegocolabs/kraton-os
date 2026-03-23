@@ -60,6 +60,7 @@ const Dashboard = () => {
     if (path.startsWith("/dashboard/portfolio")) return <PortfolioPage user={user} />;
     if (path.startsWith("/dashboard/frameworks")) return <FrameworksPage user={user} />;
     if (path.startsWith("/dashboard/profile")) return <ProfilePage user={user} />;
+    if (path.startsWith("/dashboard/calendar")) return <CalendarPage user={user} />;
     return <DashboardContent user={user} />;
   };
 
