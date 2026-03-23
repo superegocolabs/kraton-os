@@ -141,6 +141,61 @@ export type Database = {
         }
         Relationships: []
       }
+      client_feedback: {
+        Row: {
+          author_name: string
+          created_at: string
+          feedback_type: string
+          id: string
+          invoice_id: string | null
+          message: string
+          portal_id: string
+          project_id: string | null
+        }
+        Insert: {
+          author_name?: string
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          invoice_id?: string | null
+          message: string
+          portal_id: string
+          project_id?: string | null
+        }
+        Update: {
+          author_name?: string
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          invoice_id?: string | null
+          message?: string
+          portal_id?: string
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_feedback_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_feedback_portal_id_fkey"
+            columns: ["portal_id"]
+            isOneToOne: false
+            referencedRelation: "client_portals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_feedback_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_portals: {
         Row: {
           accent_color: string | null
