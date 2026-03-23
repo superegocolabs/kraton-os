@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, CreditCard, Receipt, Shield } from "lucide-react";
+import { Users, CreditCard, Receipt, Shield, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function AdminOverview() {
