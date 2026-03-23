@@ -31,11 +31,20 @@ export function AdminOverview() {
     },
   });
 
+  const { data: feedbackCount } = useQuery({
+    queryKey: ["admin", "feedback-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase.from("client_feedback").select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const stats = [
     { label: "Total Users", value: profileCount ?? 0, icon: Users },
     { label: "Active Members", value: membershipCount ?? 0, icon: CreditCard },
     { label: "Payment Proofs", value: proofCount ?? 0, icon: Receipt },
-    { label: "Admin Panel", value: "Active", icon: Shield },
+    { label: "Client Feedback", value: feedbackCount ?? 0, icon: MessageSquare },
   ];
 
   return (
