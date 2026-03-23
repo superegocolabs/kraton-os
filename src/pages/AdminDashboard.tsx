@@ -44,6 +44,7 @@ const AdminDashboard = () => {
     if (path.startsWith("/admin/memberships")) return <AdminMembershipsPage user={user} />;
     if (path.startsWith("/admin/payments")) return <AdminPaymentProofsPage />;
     if (path.startsWith("/admin/settings")) return <AdminSettingsPage user={user} />;
+    if (path.startsWith("/admin/feedback")) return <AdminFeedbackPage />;
     return <AdminOverview />;
   };
 
