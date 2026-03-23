@@ -56,6 +56,7 @@ const AdminDashboard = () => {
           <header className="h-14 flex items-center border-b border-border px-4">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-3">
+              <NotificationBell userId={user?.id} />
               <span className="text-[10px] text-destructive uppercase tracking-wider font-body font-medium">Admin</span>
               <span className="text-xs text-muted-foreground font-body">{user?.email}</span>
             </div>
