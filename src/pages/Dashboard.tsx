@@ -14,6 +14,8 @@ import { BoardsPage } from "@/components/boards/BoardsPage";
 import { NotesPage } from "@/components/notes/NotesPage";
 import { ProfilePage } from "@/components/profile/ProfilePage";
 import { SlideshowPage } from "@/components/slideshow/SlideshowPage";
+import { CalendarPage } from "@/components/calendar/CalendarPage";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
