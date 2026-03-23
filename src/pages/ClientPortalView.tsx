@@ -486,4 +486,143 @@ const ClientPortalView = () => {
   );
 };
 
+// Client Feedback Section Component
+function ClientFeedbackSection({ portalId, accent, clientName, projects, invoices }: {
+  portalId: string;
+  accent: string;
+  clientName: string;
+  projects?: any[];
+  invoices?: any[];
+}) {
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState("");
+  const [feedbackType, setFeedbackType] = useState<"comment" | "approval" | "revision">("comment");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+
+  const { data: feedback } = useQuery({
+    queryKey: ["portal-feedback", portalId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("client_feedback")
+        .select("*")
+        .eq("portal_id", portalId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const submitFeedback = useMutation({
+    mutationFn: async () => {
+      const payload: any = {
+        portal_id: portalId,
+        author_name: clientName,
+        message,
+        feedback_type: feedbackType,
+      };
+      if (selectedProjectId) payload.project_id = selectedProjectId;
+      const { error } = await supabase.from("client_feedback").insert(payload);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["portal-feedback", portalId] });
+      setMessage("");
+      toast.success("Feedback submitted!");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const typeIcon = (type: string) => {
+    if (type === "approval") return <ThumbsUp className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />;
+    if (type === "revision") return <RotateCcw className="h-3.5 w-3.5" style={{ color: "#f59e0b" }} />;
+    return <MessageSquare className="h-3.5 w-3.5" style={{ color: accent }} />;
+  };
+
+  const typeLabel = (type: string) => {
+    if (type === "approval") return "Approval";
+    if (type === "revision") return "Revision Request";
+    return "Comment";
+  };
+
+  return (
+    <div className="mt-10 md:mt-12">
+      <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
+        <MessageSquare className="h-3.5 w-3.5" /> Feedback
+      </h2>
+
+      {/* Submit form */}
+      <div className="bg-[#171717] border border-[#262626] rounded-lg p-4">
+        <div className="flex flex-wrap gap-2 mb-3">
+          {(["comment", "approval", "revision"] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => setFeedbackType(type)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-medium transition-colors ${
+                feedbackType === type
+                  ? "text-white"
+                  : "text-[#888] hover:text-white"
+              }`}
+              style={feedbackType === type ? { backgroundColor: accent + "30", color: accent } : {}}
+            >
+              {typeIcon(type)}
+              {typeLabel(type)}
+            </button>
+          ))}
+        </div>
+
+        {projects && projects.length > 0 && (
+          <select
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+            className="w-full mb-3 bg-[#0A0A0A] border border-[#262626] rounded-md px-3 py-2 text-xs text-white"
+          >
+            <option value="">General feedback</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        )}
+
+        <Textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Write your feedback..."
+          className="bg-[#0A0A0A] border-[#262626] text-white text-sm min-h-[80px] focus-visible:ring-0"
+          style={{ borderColor: accent + "30" }}
+        />
+        <Button
+          className="mt-3 gap-1.5 text-xs"
+          style={{ backgroundColor: accent, color: "#0A0A0A" }}
+          onClick={() => submitFeedback.mutate()}
+          disabled={!message.trim() || submitFeedback.isPending}
+        >
+          <Send className="h-3.5 w-3.5" />
+          {submitFeedback.isPending ? "Sending..." : "Submit Feedback"}
+        </Button>
+      </div>
+
+      {/* Feedback list */}
+      {feedback && feedback.length > 0 && (
+        <div className="mt-4 space-y-2">
+          {feedback.map((fb: any) => (
+            <div key={fb.id} className="bg-[#171717] border border-[#262626] rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-1">
+                {typeIcon(fb.feedback_type)}
+                <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: accent }}>
+                  {typeLabel(fb.feedback_type)}
+                </span>
+                <span className="text-[10px] text-[#555] ml-auto">
+                  {new Date(fb.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+              <p className="text-sm text-white leading-relaxed">{fb.message}</p>
+              <p className="text-[10px] text-[#888] mt-1">— {fb.author_name}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default ClientPortalView;
