@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard, Users, DollarSign, Briefcase, FileText, Globe, LogOut,
-  FolderOpen, Kanban, Shield, StickyNote, Brain, UserCircle, ChevronDown, Presentation,
+  FolderOpen, Kanban, Shield, StickyNote, Brain, UserCircle, ChevronDown, Presentation, CalendarDays,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -19,6 +19,7 @@ const mainNavItems = [
   { title: "CRM", url: "/dashboard/crm", icon: Users },
   { title: "Finance", url: "/dashboard/finance", icon: DollarSign },
   { title: "Portals", url: "/dashboard/portals", icon: Briefcase },
+  { title: "Calendar", url: "/dashboard/calendar", icon: CalendarDays },
   { title: "Portfolio", url: "/dashboard/portfolio", icon: Globe },
   { title: "Frameworks", url: "/dashboard/frameworks", icon: FileText },
 ];

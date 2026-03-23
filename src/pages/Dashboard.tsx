@@ -14,6 +14,8 @@ import { BoardsPage } from "@/components/boards/BoardsPage";
 import { NotesPage } from "@/components/notes/NotesPage";
 import { ProfilePage } from "@/components/profile/ProfilePage";
 import { SlideshowPage } from "@/components/slideshow/SlideshowPage";
+import { CalendarPage } from "@/components/calendar/CalendarPage";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -58,6 +60,7 @@ const Dashboard = () => {
     if (path.startsWith("/dashboard/portfolio")) return <PortfolioPage user={user} />;
     if (path.startsWith("/dashboard/frameworks")) return <FrameworksPage user={user} />;
     if (path.startsWith("/dashboard/profile")) return <ProfilePage user={user} />;
+    if (path.startsWith("/dashboard/calendar")) return <CalendarPage user={user} />;
     return <DashboardContent user={user} />;
   };
 
@@ -69,6 +72,7 @@ const Dashboard = () => {
           <header className="h-14 flex items-center border-b border-border px-4 shrink-0">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-3">
+              <NotificationBell userId={user?.id} />
               <span className="text-xs text-muted-foreground font-body truncate max-w-[200px]">{user?.email}</span>
             </div>
           </header>

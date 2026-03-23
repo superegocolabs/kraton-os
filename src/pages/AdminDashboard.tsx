@@ -8,6 +8,8 @@ import { AdminUsersPage } from "@/components/admin/AdminUsersPage";
 import { AdminMembershipsPage } from "@/components/admin/AdminMembershipsPage";
 import { AdminPaymentProofsPage } from "@/components/admin/AdminPaymentProofsPage";
 import { AdminSettingsPage } from "@/components/admin/AdminSettingsPage";
+import { AdminFeedbackPage } from "@/components/admin/AdminFeedbackPage";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { User } from "@supabase/supabase-js";
 
 const AdminDashboard = () => {
@@ -42,6 +44,7 @@ const AdminDashboard = () => {
     if (path.startsWith("/admin/memberships")) return <AdminMembershipsPage user={user} />;
     if (path.startsWith("/admin/payments")) return <AdminPaymentProofsPage />;
     if (path.startsWith("/admin/settings")) return <AdminSettingsPage user={user} />;
+    if (path.startsWith("/admin/feedback")) return <AdminFeedbackPage />;
     return <AdminOverview />;
   };
 
@@ -53,6 +56,7 @@ const AdminDashboard = () => {
           <header className="h-14 flex items-center border-b border-border px-4">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <div className="ml-auto flex items-center gap-3">
+              <NotificationBell userId={user?.id} />
               <span className="text-[10px] text-destructive uppercase tracking-wider font-body font-medium">Admin</span>
               <span className="text-xs text-muted-foreground font-body">{user?.email}</span>
             </div>
