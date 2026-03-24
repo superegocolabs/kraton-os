@@ -53,6 +53,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
     setPortalPin((profile as any).portal_pin ?? "");
     setBrandName((profile as any).brand_name ?? "");
     setBrandLogoUrl((profile as any).brand_logo_url ?? "");
+    setBrandColor((profile as any).brand_color ?? "#C5A47E");
     setInitialized(true);
   }
 
