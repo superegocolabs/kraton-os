@@ -146,8 +146,8 @@ const ClientPortalView = () => {
     printWindow.document.write(`
       <!DOCTYPE html><html><head><title>Invoice ${inv.invoice_number}</title>
       <style>body{font-family:Inter,sans-serif;margin:0;padding:40px;color:#333}
-      .header{border-bottom:3px solid ${accent};padding-bottom:20px;margin-bottom:30px}
-      .brand{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:${accent}}
+       .header{border-bottom:3px solid ${pdfAccent};padding-bottom:20px;margin-bottom:30px}
+       .brand{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:${pdfAccent}}
       h1{font-size:28px;margin:4px 0}table{width:100%;border-collapse:collapse}
       .total{font-size:24px;font-weight:bold;text-align:right;margin-top:20px}
       @media print{body{padding:20px}}</style></head>
