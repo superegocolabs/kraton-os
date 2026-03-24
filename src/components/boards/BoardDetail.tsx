@@ -16,6 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter as AlertFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
+import { BoardTeamManager } from "./BoardTeamManager";
 
 interface Board {
   id: string;
