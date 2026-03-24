@@ -172,6 +172,40 @@ export function ProfilePage({ user }: ProfilePageProps) {
                     </div>
                     <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleLogoUpload(file); e.target.value = ""; }} />
                   </div>
+                  <div>
+                    <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+                      <Palette className="h-3 w-3 inline mr-1" />Brand Color
+                    </label>
+                    <p className="text-[10px] text-muted-foreground font-body mb-2">Used as accent color in client portals and invoices.</p>
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={brandColor}
+                          onChange={(e) => setBrandColor(e.target.value)}
+                          className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+                          style={{ padding: 0 }}
+                        />
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {["#C5A47E", "#6366F1", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"].map((c) => (
+                          <button
+                            key={c}
+                            onClick={() => setBrandColor(c)}
+                            className={`w-7 h-7 rounded-full border-2 transition-all ${brandColor === c ? "border-foreground scale-110" : "border-transparent hover:border-muted-foreground"}`}
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-3 p-3 rounded-lg border border-border" style={{ borderColor: brandColor + "40" }}>
+                      <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wider mb-1">Preview</p>
+                      <div className="flex items-center gap-2">
+                        {brandLogoUrl && <img src={brandLogoUrl} alt="" className="h-6 object-contain" />}
+                        <span className="text-sm font-display font-bold" style={{ color: brandColor }}>{brandName || "Your Brand"}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="pt-3">
