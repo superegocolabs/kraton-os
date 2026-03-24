@@ -62,6 +62,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
       const { error } = await supabase.from("profiles").update({
         full_name: fullName.trim() || null, portal_pin: portalPin.trim() || null,
         brand_name: brandName.trim() || null, brand_logo_url: brandLogoUrl.trim() || null,
+        brand_color: brandColor || "#C5A47E",
       } as any).eq("id", user!.id);
       if (error) throw error;
     },
