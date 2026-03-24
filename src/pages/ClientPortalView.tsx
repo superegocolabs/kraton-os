@@ -141,7 +141,7 @@ const ClientPortalView = () => {
     const itemsHtml = items.map((item: any, i: number) =>
       `<tr><td style="padding:8px;border-bottom:1px solid #eee">${item.description || item.name || `Item ${i + 1}`}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatCurrency(Number(item.amount || 0))}</td></tr>`
     ).join("");
-    const accent = portal?.accent_color ?? "#C5A47E";
+    const pdfAccent = (ownerProfile as any)?.brand_color || portal?.accent_color || "#C5A47E";
     const logoHtml = brandLogoUrl ? `<img src="${brandLogoUrl}" style="height:40px;margin-bottom:8px;" />` : "";
     printWindow.document.write(`
       <!DOCTYPE html><html><head><title>Invoice ${inv.invoice_number}</title>
