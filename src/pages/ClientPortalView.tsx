@@ -46,7 +46,7 @@ const ClientPortalView = () => {
       if (!portalUserId) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("brand_name, brand_logo_url, full_name")
+        .select("brand_name, brand_logo_url, full_name, brand_color")
         .eq("id", portalUserId)
         .maybeSingle();
       if (error) return null;
