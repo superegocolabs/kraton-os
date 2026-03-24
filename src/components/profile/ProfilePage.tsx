@@ -270,6 +270,25 @@ export function ProfilePage({ user }: ProfilePageProps) {
                     </div>
                   )}
 
+                  {/* Team Plan */}
+                  <div className="bg-background border border-border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-display font-bold text-foreground">Team Plan</span>
+                      </div>
+                      <span className="text-[10px] font-body text-primary bg-primary/10 px-2 py-0.5 rounded-full">20% off</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-muted-foreground font-body">
+                      <p>Add team members to your boards (min 2, max 10 per board).</p>
+                      {ms?.price && (
+                        <p className="text-primary font-medium">
+                          {formatCurrency(Math.round(Number(ms.price) * 6 * 0.8))} per member / 6 months
+                        </p>
+                      )}
+                      <p>Need more than 10? Contact admin.</p>
+                    </div>
+                  </div>
                   <div className="bg-background border border-border rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <CreditCard className="h-4 w-4 text-primary" />
