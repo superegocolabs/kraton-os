@@ -46,7 +46,7 @@ const ClientPortalView = () => {
       if (!portalUserId) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("brand_name, brand_logo_url, full_name")
+        .select("brand_name, brand_logo_url, full_name, brand_color")
         .eq("id", portalUserId)
         .maybeSingle();
       if (error) return null;
@@ -141,13 +141,13 @@ const ClientPortalView = () => {
     const itemsHtml = items.map((item: any, i: number) =>
       `<tr><td style="padding:8px;border-bottom:1px solid #eee">${item.description || item.name || `Item ${i + 1}`}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${formatCurrency(Number(item.amount || 0))}</td></tr>`
     ).join("");
-    const accent = portal?.accent_color ?? "#C5A47E";
+    const pdfAccent = (ownerProfile as any)?.brand_color || portal?.accent_color || "#C5A47E";
     const logoHtml = brandLogoUrl ? `<img src="${brandLogoUrl}" style="height:40px;margin-bottom:8px;" />` : "";
     printWindow.document.write(`
       <!DOCTYPE html><html><head><title>Invoice ${inv.invoice_number}</title>
       <style>body{font-family:Inter,sans-serif;margin:0;padding:40px;color:#333}
-      .header{border-bottom:3px solid ${accent};padding-bottom:20px;margin-bottom:30px}
-      .brand{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:${accent}}
+       .header{border-bottom:3px solid ${pdfAccent};padding-bottom:20px;margin-bottom:30px}
+       .brand{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:${pdfAccent}}
       h1{font-size:28px;margin:4px 0}table{width:100%;border-collapse:collapse}
       .total{font-size:24px;font-weight:bold;text-align:right;margin-top:20px}
       @media print{body{padding:20px}}</style></head>
@@ -189,7 +189,7 @@ const ClientPortalView = () => {
     );
   }
 
-  const accent = portal.accent_color ?? "#C5A47E";
+  const accent = (ownerProfile as any)?.brand_color || portal.accent_color || "#C5A47E";
 
   // PIN Gate
   if (hasPin && !pinVerified) {

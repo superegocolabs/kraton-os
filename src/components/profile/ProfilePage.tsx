@@ -3,7 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Save, Settings, Crown, Upload, Image, CreditCard, Check, Send, File } from "lucide-react";
+import { Save, Settings, Crown, Upload, Image, CreditCard, Check, Send, File, Palette, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -42,6 +42,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
   const [portalPin, setPortalPin] = useState("");
   const [brandName, setBrandName] = useState("");
   const [brandLogoUrl, setBrandLogoUrl] = useState("");
+  const [brandColor, setBrandColor] = useState("#C5A47E");
   const [initialized, setInitialized] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [pendingProof, setPendingProof] = useState<File | null>(null);
@@ -52,6 +53,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
     setPortalPin((profile as any).portal_pin ?? "");
     setBrandName((profile as any).brand_name ?? "");
     setBrandLogoUrl((profile as any).brand_logo_url ?? "");
+    setBrandColor((profile as any).brand_color ?? "#C5A47E");
     setInitialized(true);
   }
 
@@ -60,6 +62,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
       const { error } = await supabase.from("profiles").update({
         full_name: fullName.trim() || null, portal_pin: portalPin.trim() || null,
         brand_name: brandName.trim() || null, brand_logo_url: brandLogoUrl.trim() || null,
+        brand_color: brandColor || "#C5A47E",
       } as any).eq("id", user!.id);
       if (error) throw error;
     },
@@ -169,6 +172,40 @@ export function ProfilePage({ user }: ProfilePageProps) {
                     </div>
                     <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleLogoUpload(file); e.target.value = ""; }} />
                   </div>
+                  <div>
+                    <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+                      <Palette className="h-3 w-3 inline mr-1" />Brand Color
+                    </label>
+                    <p className="text-[10px] text-muted-foreground font-body mb-2">Used as accent color in client portals and invoices.</p>
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={brandColor}
+                          onChange={(e) => setBrandColor(e.target.value)}
+                          className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+                          style={{ padding: 0 }}
+                        />
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {["#C5A47E", "#6366F1", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"].map((c) => (
+                          <button
+                            key={c}
+                            onClick={() => setBrandColor(c)}
+                            className={`w-7 h-7 rounded-full border-2 transition-all ${brandColor === c ? "border-foreground scale-110" : "border-transparent hover:border-muted-foreground"}`}
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-3 p-3 rounded-lg border border-border" style={{ borderColor: brandColor + "40" }}>
+                      <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wider mb-1">Preview</p>
+                      <div className="flex items-center gap-2">
+                        {brandLogoUrl && <img src={brandLogoUrl} alt="" className="h-6 object-contain" />}
+                        <span className="text-sm font-display font-bold" style={{ color: brandColor }}>{brandName || "Your Brand"}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="pt-3">
@@ -233,6 +270,25 @@ export function ProfilePage({ user }: ProfilePageProps) {
                     </div>
                   )}
 
+                  {/* Team Plan */}
+                  <div className="bg-background border border-border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-display font-bold text-foreground">Team Plan</span>
+                      </div>
+                      <span className="text-[10px] font-body text-primary bg-primary/10 px-2 py-0.5 rounded-full">20% off</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-muted-foreground font-body">
+                      <p>Add team members to your boards (min 2, max 10 per board).</p>
+                      {ms?.price && (
+                        <p className="text-primary font-medium">
+                          {formatCurrency(Math.round(Number(ms.price) * 6 * 0.8))} per member / 6 months
+                        </p>
+                      )}
+                      <p>Need more than 10? Contact admin.</p>
+                    </div>
+                  </div>
                   <div className="bg-background border border-border rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <CreditCard className="h-4 w-4 text-primary" />

@@ -181,6 +181,35 @@ export function AdminSettingsPage({ user }: AdminSettingsPageProps) {
           </Button>
         </div>
 
+        {/* Team Plan Info */}
+        <div className="bg-card border border-border rounded-lg p-4 md:p-6 mt-6">
+          <h2 className="text-sm font-display font-bold text-foreground uppercase tracking-wider mb-4">Team Plan</h2>
+          <div className="space-y-3">
+            <div className="p-4 bg-muted rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-display font-bold text-foreground">Team Membership</h3>
+                <span className="text-xs font-body text-primary bg-primary/10 px-2 py-0.5 rounded-full">20% off</span>
+              </div>
+              <div className="space-y-2 text-xs font-body text-muted-foreground">
+                <p>• <strong className="text-foreground">Billing:</strong> Per 6 months (20% discount from individual plan)</p>
+                <p>• <strong className="text-foreground">Min team:</strong> 2 members</p>
+                <p>• <strong className="text-foreground">Max team:</strong> 10 members per board</p>
+                <p>• <strong className="text-foreground">Above 10:</strong> Contact admin for enterprise pricing</p>
+                <p>• <strong className="text-foreground">How it works:</strong> Board owners add team members who have active memberships. Each member needs their own active plan.</p>
+              </div>
+              <div className="mt-3 p-3 bg-background rounded-md border border-border">
+                <p className="text-xs font-body text-foreground font-medium">Team pricing calculation:</p>
+                <p className="text-xs font-body text-muted-foreground mt-1">
+                  Individual: {membershipSettings ? `Rp ${Number((membershipSettings as any).price).toLocaleString()}` : "..."}/mo
+                </p>
+                <p className="text-xs font-body text-primary mt-0.5">
+                  Team (6mo): {membershipSettings ? `Rp ${Math.round(Number((membershipSettings as any).price) * 6 * 0.8).toLocaleString()}` : "..."} per member / 6 months
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Feature Flags */}
         <div className="bg-card border border-border rounded-lg p-4 md:p-6 mt-6">
           <h2 className="text-sm font-display font-bold text-foreground uppercase tracking-wider mb-4">Feature Flags</h2>

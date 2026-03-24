@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, X, Calendar, Tag, User, Trash2, Pencil, Check, Eye } from "lucide-react";
+import { ArrowLeft, Plus, X, Calendar, Tag, User, Trash2, Pencil, Check, Eye, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter as AlertFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
+import { BoardTeamManager } from "./BoardTeamManager";
 
 interface Board {
   id: string;
@@ -62,7 +63,18 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
   const [previewCard, setPreviewCard] = useState<any | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [editingListTitle, setEditingListTitle] = useState("");
+  const [teamOpen, setTeamOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  // Board members count
+  const { data: boardMembers } = useQuery({
+    queryKey: ["board-members", board.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("board_members").select("id").eq("board_id", board.id);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: lists } = useQuery({
     queryKey: ["board-lists", board.id],
@@ -192,7 +204,13 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
           <h1 className="text-lg font-display font-bold text-foreground truncate">{board.title}</h1>
           {board.description && <p className="text-xs text-muted-foreground font-body truncate">{board.description}</p>}
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5 text-xs font-body ml-auto shrink-0" onClick={() => setTeamOpen(true)}>
+          <Users className="h-3.5 w-3.5" />
+          Team {boardMembers?.length ? `(${boardMembers.length})` : ""}
+        </Button>
       </div>
+
+      <BoardTeamManager boardId={board.id} open={teamOpen} onOpenChange={setTeamOpen} />
 
       {/* Board with DnD */}
       <DragDropContext onDragEnd={handleDragEnd}>

@@ -114,6 +114,38 @@ export type Database = {
           },
         ]
       }
+      board_members: {
+        Row: {
+          added_at: string
+          board_id: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          board_id: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          board_id?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_members_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       boards: {
         Row: {
           created_at: string | null
@@ -495,6 +527,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          brand_color: string | null
           brand_logo_url: string | null
           brand_name: string | null
           created_at: string | null
@@ -504,6 +537,7 @@ export type Database = {
           portal_pin: string | null
         }
         Insert: {
+          brand_color?: string | null
           brand_logo_url?: string | null
           brand_name?: string | null
           created_at?: string | null
@@ -513,6 +547,7 @@ export type Database = {
           portal_pin?: string | null
         }
         Update: {
+          brand_color?: string | null
           brand_logo_url?: string | null
           brand_name?: string | null
           created_at?: string | null
