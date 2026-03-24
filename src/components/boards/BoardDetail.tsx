@@ -204,7 +204,13 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
           <h1 className="text-lg font-display font-bold text-foreground truncate">{board.title}</h1>
           {board.description && <p className="text-xs text-muted-foreground font-body truncate">{board.description}</p>}
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5 text-xs font-body ml-auto shrink-0" onClick={() => setTeamOpen(true)}>
+          <Users className="h-3.5 w-3.5" />
+          Team {boardMembers?.length ? `(${boardMembers.length})` : ""}
+        </Button>
       </div>
+
+      <BoardTeamManager boardId={board.id} open={teamOpen} onOpenChange={setTeamOpen} />
 
       {/* Board with DnD */}
       <DragDropContext onDragEnd={handleDragEnd}>
