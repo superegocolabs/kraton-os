@@ -42,6 +42,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
   const [portalPin, setPortalPin] = useState("");
   const [brandName, setBrandName] = useState("");
   const [brandLogoUrl, setBrandLogoUrl] = useState("");
+  const [brandColor, setBrandColor] = useState("#C5A47E");
   const [initialized, setInitialized] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [pendingProof, setPendingProof] = useState<File | null>(null);
