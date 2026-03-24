@@ -189,7 +189,7 @@ const ClientPortalView = () => {
     );
   }
 
-  const accent = portal.accent_color ?? "#C5A47E";
+  const accent = (ownerProfile as any)?.brand_color || portal.accent_color || "#C5A47E";
 
   // PIN Gate
   if (hasPin && !pinVerified) {
