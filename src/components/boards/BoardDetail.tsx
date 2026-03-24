@@ -63,7 +63,18 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
   const [previewCard, setPreviewCard] = useState<any | null>(null);
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [editingListTitle, setEditingListTitle] = useState("");
+  const [teamOpen, setTeamOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  // Board members count
+  const { data: boardMembers } = useQuery({
+    queryKey: ["board-members", board.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("board_members").select("id").eq("board_id", board.id);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: lists } = useQuery({
     queryKey: ["board-lists", board.id],
