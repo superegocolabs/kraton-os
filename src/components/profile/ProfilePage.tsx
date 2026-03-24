@@ -3,7 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Save, Settings, Crown, Upload, Image, CreditCard, Check, Send, File, Palette } from "lucide-react";
+import { Save, Settings, Crown, Upload, Image, CreditCard, Check, Send, File, Palette, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
