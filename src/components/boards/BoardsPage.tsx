@@ -37,6 +37,9 @@ export function BoardsPage({ user }: BoardsPageProps) {
     },
   });
 
+  // Count only own boards for free limit check (exclude shared boards)
+  const ownBoardCount = boards?.filter(b => b.user_id === user?.id).length ?? 0;
+
   const addBoard = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("boards").insert({ title: newTitle.trim(), description: newDesc.trim() || null, user_id: user!.id });
