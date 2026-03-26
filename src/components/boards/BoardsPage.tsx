@@ -89,7 +89,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
             <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Boards</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Manage tasks and workflows with kanban boards.
-              {!isMember && <span className="text-primary ml-2">({boardCount}/{FREE_LIMITS.boards} boards)</span>}
+              {!isMember && <span className="text-primary ml-2">({ownBoardCount}/{FREE_LIMITS.boards} boards)</span>}
             </p>
           </div>
           <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate}>

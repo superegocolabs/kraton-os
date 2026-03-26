@@ -174,35 +174,51 @@ export function ProfilePage({ user }: ProfilePageProps) {
                   </div>
                   <div>
                     <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
-                      <Palette className="h-3 w-3 inline mr-1" />Brand Color
+                      <Palette className="h-3 w-3 inline mr-1" />Brand Theme
                     </label>
-                    <p className="text-[10px] text-muted-foreground font-body mb-2">Used as accent color in client portals and invoices.</p>
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={brandColor}
-                          onChange={(e) => setBrandColor(e.target.value)}
-                          className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
-                          style={{ padding: 0 }}
-                        />
-                      </div>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {["#C5A47E", "#6366F1", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"].map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => setBrandColor(c)}
-                            className={`w-7 h-7 rounded-full border-2 transition-all ${brandColor === c ? "border-foreground scale-110" : "border-transparent hover:border-muted-foreground"}`}
-                            style={{ backgroundColor: c }}
-                          />
-                        ))}
-                      </div>
+                    <p className="text-[10px] text-muted-foreground font-body mb-3">Choose a theme for your client portals and invoices.</p>
+                    
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {BRAND_THEMES.map((theme) => (
+                        <button
+                          key={theme.name}
+                          onClick={() => setBrandColor(theme.primary)}
+                          className={`group relative p-3 rounded-lg border-2 transition-all text-left ${
+                            brandColor === theme.primary
+                              ? "border-foreground bg-muted/50"
+                              : "border-border hover:border-muted-foreground bg-card"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex -space-x-1">
+                              {theme.colors.map((c, i) => (
+                                <div
+                                  key={i}
+                                  className="w-4 h-4 rounded-full border border-background"
+                                  style={{ backgroundColor: c }}
+                                />
+                              ))}
+                            </div>
+                            {brandColor === theme.primary && (
+                              <Check className="h-3 w-3 text-primary ml-auto" />
+                            )}
+                          </div>
+                          <p className="text-xs font-display font-bold text-foreground">{theme.name}</p>
+                          <p className="text-[10px] text-muted-foreground font-body">{theme.description}</p>
+                        </button>
+                      ))}
                     </div>
+
                     <div className="mt-3 p-3 rounded-lg border border-border" style={{ borderColor: brandColor + "40" }}>
                       <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wider mb-1">Preview</p>
                       <div className="flex items-center gap-2">
                         {brandLogoUrl && <img src={brandLogoUrl} alt="" className="h-6 object-contain" />}
                         <span className="text-sm font-display font-bold" style={{ color: brandColor }}>{brandName || "Your Brand"}</span>
+                      </div>
+                      <div className="flex gap-1.5 mt-2">
+                        <div className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: brandColor }} />
+                        <div className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: brandColor, opacity: 0.5 }} />
+                        <div className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: brandColor, opacity: 0.2 }} />
                       </div>
                     </div>
                   </div>
