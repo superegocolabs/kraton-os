@@ -37,6 +37,9 @@ export function BoardsPage({ user }: BoardsPageProps) {
     },
   });
 
+  // Count only own boards for free limit check (exclude shared boards)
+  const ownBoardCount = boards?.filter(b => b.user_id === user?.id).length ?? 0;
+
   const addBoard = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("boards").insert({ title: newTitle.trim(), description: newDesc.trim() || null, user_id: user!.id });
@@ -64,8 +67,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
   const selectedBoard = boards?.find((b) => b.id === selectedBoardId);
   if (selectedBoard) return <BoardDetail board={selectedBoard} onBack={() => setSelectedBoardId(null)} />;
 
-  const boardCount = boards?.length ?? 0;
-  const canCreate = isMember || boardCount < FREE_LIMITS.boards;
+  const canCreate = isMember || ownBoardCount < FREE_LIMITS.boards;
   const handleCreate = () => {
     if (!canCreate) { toast.error("Upgrade your membership to create more boards."); return; }
     setAddDialogOpen(true);
@@ -87,7 +89,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
             <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">Boards</h1>
             <p className="text-sm text-muted-foreground font-body mt-1">
               Manage tasks and workflows with kanban boards.
-              {!isMember && <span className="text-primary ml-2">({boardCount}/{FREE_LIMITS.boards} boards)</span>}
+              {!isMember && <span className="text-primary ml-2">({ownBoardCount}/{FREE_LIMITS.boards} boards)</span>}
             </p>
           </div>
           <Button variant="accent" className="gap-2 shrink-0" onClick={handleCreate}>
