@@ -13,6 +13,17 @@ import { formatCurrency } from "@/lib/currency";
 
 interface ProfilePageProps { user: User | null; }
 
+const BRAND_THEMES = [
+  { name: "Gold Sand", description: "Warm luxury, classic studio", primary: "#C5A47E", colors: ["#C5A47E", "#D4B896", "#8B7355"] },
+  { name: "Pastel Rose", description: "Soft, elegant & feminine", primary: "#E8A0BF", colors: ["#E8A0BF", "#F5C6D0", "#BA7BA1"] },
+  { name: "Ocean Breeze", description: "Cool, calm & professional", primary: "#5B9BD5", colors: ["#5B9BD5", "#7EC8E3", "#3A7CA5"] },
+  { name: "Mint Fresh", description: "Clean & modern feel", primary: "#6BCFA7", colors: ["#6BCFA7", "#A8E6CF", "#45B08C"] },
+  { name: "Lavender Dream", description: "Creative & artistic", primary: "#9B8EC4", colors: ["#9B8EC4", "#C4B7E0", "#7B6FA0"] },
+  { name: "Sunset Coral", description: "Warm, energetic & bold", primary: "#F4845F", colors: ["#F4845F", "#F7B27A", "#D96B4E"] },
+  { name: "Slate Pro", description: "Minimal & corporate", primary: "#64748B", colors: ["#64748B", "#94A3B8", "#475569"] },
+  { name: "Electric Indigo", description: "Modern tech & digital", primary: "#6366F1", colors: ["#6366F1", "#818CF8", "#4F46E5"] },
+];
+
 export function ProfilePage({ user }: ProfilePageProps) {
   const queryClient = useQueryClient();
   const { membership, isMember, isLoading: membershipLoading } = useMembership(user?.id);
