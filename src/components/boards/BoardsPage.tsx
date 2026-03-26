@@ -67,8 +67,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
   const selectedBoard = boards?.find((b) => b.id === selectedBoardId);
   if (selectedBoard) return <BoardDetail board={selectedBoard} onBack={() => setSelectedBoardId(null)} />;
 
-  const boardCount = boards?.length ?? 0;
-  const canCreate = isMember || boardCount < FREE_LIMITS.boards;
+  const canCreate = isMember || ownBoardCount < FREE_LIMITS.boards;
   const handleCreate = () => {
     if (!canCreate) { toast.error("Upgrade your membership to create more boards."); return; }
     setAddDialogOpen(true);
