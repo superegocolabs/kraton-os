@@ -379,7 +379,7 @@ const ClientPortalView = () => {
           </div>
 
           {/* Client Feedback Section */}
-          <ClientFeedbackSection portalId={portal.id} accent={accent} clientName={portal.clients?.name ?? "Client"} projects={projects} invoices={invoices} />
+          <ClientFeedbackSection portalId={portal.id} accent={accent} portalTheme={pt} clientName={portal.clients?.name ?? "Client"} projects={projects} invoices={invoices} />
 
           {/* Footer */}
           <div className="mt-12 md:mt-16 pt-6 border-t border-[#262626]">
