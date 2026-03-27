@@ -214,7 +214,8 @@ const ClientPortalView = () => {
               value={pinInput}
               onChange={(e) => { setPinInput(e.target.value); setPinError(false); }}
               placeholder="Access code"
-              className="bg-[#171717] border-[#262626] text-white text-center tracking-[0.3em] focus-visible:ring-0 focus-visible:border-[#C5A47E]"
+              className="text-center tracking-[0.3em] focus-visible:ring-0"
+              style={{ backgroundColor: pt.card, borderColor: pt.border, color: pt.text }}
               maxLength={6}
               onKeyDown={(e) => e.key === "Enter" && handlePinSubmit()}
             />
