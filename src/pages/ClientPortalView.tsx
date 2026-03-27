@@ -247,7 +247,7 @@ const ClientPortalView = () => {
   const statusIcon = (status: string) => {
     if (status === "completed" || status === "paid") return <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />;
     if (status === "active" || status === "sent") return <Clock className="h-3.5 w-3.5" style={{ color: accent }} />;
-    return <Clock className="h-3.5 w-3.5" style={{ color: "#888" }} />;
+    return <Clock className="h-3.5 w-3.5" style={{ color: pt.muted }} />;
   };
 
   const lineItems = (inv: any) => {
