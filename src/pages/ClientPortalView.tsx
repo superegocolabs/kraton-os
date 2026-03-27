@@ -300,7 +300,7 @@ const ClientPortalView = () => {
                     </div>
                     {p.description && <p className="text-xs mt-2 leading-relaxed" style={{ color: pt.muted }}>{p.description}</p>}
                     {(p.start_date || p.end_date) && (
-                      <p className="text-[10px] text-[#555] mt-2">
+                      <p className="text-[10px] mt-2" style={{ color: pt.muted + "88" }}>
                         {p.start_date && new Date(p.start_date).toLocaleDateString()}
                         {p.start_date && p.end_date && " — "}
                         {p.end_date && new Date(p.end_date).toLocaleDateString()}
