@@ -467,8 +467,8 @@ const ClientPortalView = () => {
             )}
 
             {selectedInvoice.payment_proof_url && (
-              <div className="p-4 md:p-6 border-b border-[#262626]">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Payment Proof</p>
+              <div className="p-4 md:p-6" style={{ borderBottomColor: pt.border, borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
+                <p className="text-[10px] uppercase tracking-[0.15em] mb-2" style={{ color: pt.muted }}>Payment Proof</p>
                 <a href={selectedInvoice.payment_proof_url} target="_blank" rel="noopener noreferrer" className="text-sm underline" style={{ color: accent }}>View uploaded proof</a>
               </div>
             )}
