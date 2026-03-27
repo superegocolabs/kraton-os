@@ -191,6 +191,8 @@ const ClientPortalView = () => {
   }
 
   const accent = (ownerProfile as any)?.brand_color || portal.accent_color || "#C5A47E";
+  const theme = getThemeByColor(accent);
+  const pt = theme.portal; // portal theme colors
 
   // PIN Gate
   if (hasPin && !pinVerified) {
