@@ -491,9 +491,10 @@ const ClientPortalView = () => {
 };
 
 // Client Feedback Section Component
-function ClientFeedbackSection({ portalId, accent, clientName, projects, invoices }: {
+function ClientFeedbackSection({ portalId, accent, portalTheme: pt, clientName, projects, invoices }: {
   portalId: string;
   accent: string;
+  portalTheme: { bg: string; card: string; border: string; text: string; muted: string };
   clientName: string;
   projects?: any[];
   invoices?: any[];
