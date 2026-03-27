@@ -206,11 +206,11 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
         </div>
         <Button variant="outline" size="sm" className="gap-1.5 text-xs font-body ml-auto shrink-0" onClick={() => setTeamOpen(true)}>
           <Users className="h-3.5 w-3.5" />
-          Team {boardMembers?.length ? `(${boardMembers.length})` : ""}
+          Share {boardMembers?.length ? `(${boardMembers.length})` : ""}
         </Button>
       </div>
 
-      <BoardTeamManager boardId={board.id} open={teamOpen} onOpenChange={setTeamOpen} />
+      <BoardTeamManager boardId={board.id} boardTitle={board.title} open={teamOpen} onOpenChange={setTeamOpen} />
 
       {/* Board with DnD */}
       <DragDropContext onDragEnd={handleDragEnd}>
