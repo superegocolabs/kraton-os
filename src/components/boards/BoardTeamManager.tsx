@@ -270,10 +270,10 @@ export function BoardTeamManager({ boardId, boardTitle, open, onOpenChange }: Bo
                   {pendingInvites.map((invite) => {
                     const profile = getInviteProfile(invite.invited_user_id);
                     return (
-                      <div key={invite.id} className="flex items-center justify-between p-2.5 bg-yellow-500/5 border border-yellow-500/20 rounded-md">
+                      <div key={invite.id} className="flex items-center justify-between p-2.5 bg-accent/30 border border-accent/40 rounded-md">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-7 h-7 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-                            <Clock className="h-3.5 w-3.5 text-yellow-500" />
+                          <div className="w-7 h-7 rounded-full bg-accent/50 flex items-center justify-center shrink-0">
+                            <Clock className="h-3.5 w-3.5 text-accent-foreground" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-body font-medium text-foreground truncate">
