@@ -374,7 +374,7 @@ const ClientPortalView = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#888]">No invoices yet.</p>
+              <p className="text-sm" style={{ color: pt.muted }}>No invoices yet.</p>
             )}
           </div>
 
