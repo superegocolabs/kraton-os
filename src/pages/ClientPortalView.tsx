@@ -288,7 +288,7 @@ const ClientPortalView = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {projects.map((p, i) => (
                   <motion.div key={p.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
-                    className="bg-[#171717] border border-[#262626] rounded-lg p-4">
+                    className="rounded-lg p-4" style={{ backgroundColor: pt.card, borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }}>
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.name}</span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-medium" style={{
