@@ -432,7 +432,7 @@ const ClientPortalView = () => {
                   </div>
                 )}
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[#888]">Status</p>
+                  <p className="text-[10px] uppercase tracking-[0.15em]" style={{ color: pt.muted }}>Status</p>
                   <p className="text-sm mt-0.5 uppercase font-medium" style={{ color: selectedInvoice.status === "paid" ? "#4ade80" : accent }}>{selectedInvoice.status}</p>
                 </div>
               </div>
