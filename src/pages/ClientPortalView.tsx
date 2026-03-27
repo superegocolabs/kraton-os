@@ -270,7 +270,7 @@ const ClientPortalView = () => {
             )}
             <div>
               <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>{brandName}</p>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mt-1" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+              <h1 className="text-2xl md:text-3xl font-bold mt-1" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>
                 Welcome, {portal.clients?.name}
               </h1>
             </div>
