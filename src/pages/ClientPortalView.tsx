@@ -427,8 +427,8 @@ const ClientPortalView = () => {
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {selectedInvoice.due_date && (
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-[#888]">Due Date</p>
-                    <p className="text-sm text-white mt-0.5">{new Date(selectedInvoice.due_date).toLocaleDateString()}</p>
+                    <p className="text-[10px] uppercase tracking-[0.15em]" style={{ color: pt.muted }}>Due Date</p>
+                    <p className="text-sm mt-0.5" style={{ color: pt.text }}>{new Date(selectedInvoice.due_date).toLocaleDateString()}</p>
                   </div>
                 )}
                 <div>
