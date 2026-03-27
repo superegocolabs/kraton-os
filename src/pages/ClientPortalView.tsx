@@ -310,7 +310,7 @@ const ClientPortalView = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#888]">No projects yet.</p>
+              <p className="text-sm" style={{ color: pt.muted }}>No projects yet.</p>
             )}
           </div>
 
