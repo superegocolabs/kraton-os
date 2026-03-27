@@ -258,7 +258,7 @@ const ClientPortalView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="min-h-screen" style={{ fontFamily: 'Inter, sans-serif', backgroundColor: pt.bg }}>
       <div className="h-1" style={{ backgroundColor: accent }} />
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
