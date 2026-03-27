@@ -266,7 +266,7 @@ const ClientPortalView = () => {
           {/* Header with brand */}
           <div className="flex items-center gap-4 mb-2">
             {brandLogoUrl && (
-              <img src={brandLogoUrl} alt="Brand" className="h-10 w-10 rounded-lg object-contain border border-[#262626]" />
+              <img src={brandLogoUrl} alt="Brand" className="h-10 w-10 rounded-lg object-contain" style={{ borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }} />
             )}
             <div>
               <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: accent }}>{brandName}</p>
