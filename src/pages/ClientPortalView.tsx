@@ -399,17 +399,18 @@ const ClientPortalView = () => {
       {/* Invoice Detail Modal */}
       {selectedInvoice && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelectedInvoice(null)}>
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#171717] border border-[#262626] rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto"
+           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto"
+            style={{ backgroundColor: pt.card, borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }}
             onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 md:p-6 border-b border-[#262626]">
+            <div className="p-4 md:p-6" style={{ borderBottomColor: pt.border, borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   {brandLogoUrl && <img src={brandLogoUrl} alt="Brand" className="h-8 object-contain" />}
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.25em] mb-1" style={{ color: accent }}>{brandName}</p>
-                    <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>INVOICE</h2>
-                    <p className="text-sm text-[#888] mt-1">{selectedInvoice.invoice_number}</p>
+                    <h2 className="text-xl font-bold" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>INVOICE</h2>
+                    <p className="text-sm mt-1" style={{ color: pt.muted }}>{selectedInvoice.invoice_number}</p>
                   </div>
                 </div>
                 <button onClick={() => setSelectedInvoice(null)} className="text-[#888] hover:text-white p-1">
