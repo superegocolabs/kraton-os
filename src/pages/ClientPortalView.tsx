@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { FolderOpen, FileText, CheckCircle2, Clock, Upload, Eye, X, Send, File, Lock, Download, MessageSquare, ThumbsUp, RotateCcw } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { getThemeByColor } from "@/lib/brandThemes";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
