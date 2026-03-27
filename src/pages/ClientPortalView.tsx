@@ -563,12 +563,8 @@ function ClientFeedbackSection({ portalId, accent, portalTheme: pt, clientName, 
             <button
               key={type}
               onClick={() => setFeedbackType(type)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-medium transition-colors ${
-                  feedbackType === type ? "" : ""
-              }`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-medium transition-colors"
               style={feedbackType === type ? { backgroundColor: accent + "30", color: accent } : { color: pt.muted }}
-              }`}
-              style={feedbackType === type ? { backgroundColor: accent + "30", color: accent } : {}}
             >
               {typeIcon(type)}
               {typeLabel(type)}
