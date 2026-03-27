@@ -316,7 +316,7 @@ const ClientPortalView = () => {
 
           {/* Invoices */}
           <div className="mt-10 md:mt-12">
-            <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
+            <h2 className="text-xs uppercase tracking-[0.15em] mb-4 flex items-center gap-2" style={{ color: pt.muted }}>
               <FileText className="h-3.5 w-3.5" /> Invoices
             </h2>
             {invoices && invoices.length > 0 ? (
