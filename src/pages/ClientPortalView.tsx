@@ -552,12 +552,12 @@ function ClientFeedbackSection({ portalId, accent, portalTheme: pt, clientName, 
 
   return (
     <div className="mt-10 md:mt-12">
-      <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
+      <h2 className="text-xs uppercase tracking-[0.15em] mb-4 flex items-center gap-2" style={{ color: pt.muted }}>
         <MessageSquare className="h-3.5 w-3.5" /> Feedback
       </h2>
 
       {/* Submit form */}
-      <div className="bg-[#171717] border border-[#262626] rounded-lg p-4">
+      <div className="rounded-lg p-4" style={{ backgroundColor: pt.card, borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }}>
         <div className="flex flex-wrap gap-2 mb-3">
           {(["comment", "approval", "revision"] as const).map((type) => (
             <button
