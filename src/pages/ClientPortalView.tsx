@@ -275,7 +275,7 @@ const ClientPortalView = () => {
               </h1>
             </div>
           </div>
-          <p className="text-[#888] mt-3 text-sm leading-relaxed max-w-lg">
+          <p className="mt-3 text-sm leading-relaxed max-w-lg" style={{ color: pt.muted }}>
             {String(portal.welcome_message ?? "").replace(/<[^>]*>/g, "")}
           </p>
 
