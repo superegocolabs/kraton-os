@@ -220,7 +220,7 @@ const ClientPortalView = () => {
               onKeyDown={(e) => e.key === "Enter" && handlePinSubmit()}
             />
             {pinError && <p className="text-xs text-red-400">Invalid access code. Please try again.</p>}
-            <Button className="w-full" style={{ backgroundColor: accent, color: "#0A0A0A" }} onClick={handlePinSubmit} disabled={!pinInput}>
+            <Button className="w-full" style={{ backgroundColor: accent, color: pt.bg }} onClick={handlePinSubmit} disabled={!pinInput}>
               Enter Portal
             </Button>
           </div>
