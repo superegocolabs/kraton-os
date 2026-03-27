@@ -361,10 +361,10 @@ const ClientPortalView = () => {
                           <span className="text-xs shrink-0" style={{ color: pt.muted }}>{(pendingFile.file.size / 1024).toFixed(0)} KB</span>
                         </div>
                         <div className="flex gap-2 mt-2">
-                          <Button size="sm" className="flex-1 gap-1.5 text-xs" style={{ backgroundColor: accent, color: "#0A0A0A" }} onClick={handleSendProof} disabled={isSending}>
+                          <Button size="sm" className="flex-1 gap-1.5 text-xs" style={{ backgroundColor: accent, color: pt.bg }} onClick={handleSendProof} disabled={isSending}>
                             <Send className="h-3.5 w-3.5" />{isSending ? "Sending..." : "Send"}
                           </Button>
-                          <Button size="sm" variant="outline" className="text-xs border-[#333] text-[#888] hover:text-white hover:bg-[#262626]" onClick={() => setPendingFile(null)} disabled={isSending}>
+                          <Button size="sm" variant="outline" className="text-xs" style={{ borderColor: pt.border, color: pt.muted }} onClick={() => setPendingFile(null)} disabled={isSending}>
                             Cancel
                           </Button>
                         </div>
