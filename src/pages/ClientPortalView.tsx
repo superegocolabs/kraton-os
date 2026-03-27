@@ -474,11 +474,11 @@ const ClientPortalView = () => {
             )}
 
             <div className="p-4 md:p-6 flex flex-col sm:flex-row gap-2">
-              <Button variant="outline" className="flex-1 gap-2 border-[#262626] text-white hover:bg-[#262626]" onClick={() => handleDownloadPdf(selectedInvoice)}>
+              <Button variant="outline" className="flex-1 gap-2" style={{ borderColor: pt.border, color: pt.text }} onClick={() => handleDownloadPdf(selectedInvoice)}>
                 <Download className="h-4 w-4" /> Download PDF
               </Button>
               {selectedInvoice.status !== "paid" && (
-                <Button variant="outline" className="flex-1 gap-2 border-[#262626] text-white hover:bg-[#262626]"
+                <Button variant="outline" className="flex-1 gap-2" style={{ borderColor: pt.border, color: pt.text }}
                   onClick={() => { setUploadingId(selectedInvoice.id); fileInputRef.current?.click(); }}>
                   <Upload className="h-4 w-4" /> Upload Payment Proof
                 </Button>
