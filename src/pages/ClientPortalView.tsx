@@ -460,9 +460,9 @@ const ClientPortalView = () => {
             </div>
 
             {selectedInvoice.notes && (
-              <div className="p-4 md:p-6 border-b border-[#262626]">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Notes</p>
-                <p className="text-sm text-[#888] leading-relaxed">{selectedInvoice.notes}</p>
+              <div className="p-4 md:p-6" style={{ borderBottomColor: pt.border, borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
+                <p className="text-[10px] uppercase tracking-[0.15em] mb-2" style={{ color: pt.muted }}>Notes</p>
+                <p className="text-sm leading-relaxed" style={{ color: pt.muted }}>{selectedInvoice.notes}</p>
               </div>
             )}
 
