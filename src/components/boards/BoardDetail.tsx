@@ -210,7 +210,7 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
         </Button>
       </div>
 
-      <BoardTeamManager boardId={board.id} open={teamOpen} onOpenChange={setTeamOpen} />
+      <BoardTeamManager boardId={board.id} boardTitle={board.title} open={teamOpen} onOpenChange={setTeamOpen} />
 
       {/* Board with DnD */}
       <DragDropContext onDragEnd={handleDragEnd}>
