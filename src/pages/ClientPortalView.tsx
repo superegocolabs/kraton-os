@@ -281,7 +281,7 @@ const ClientPortalView = () => {
 
           {/* Projects with status badges */}
           <div className="mt-10 md:mt-12">
-            <h2 className="text-xs uppercase tracking-[0.15em] text-[#888] mb-4 flex items-center gap-2">
+            <h2 className="text-xs uppercase tracking-[0.15em] mb-4 flex items-center gap-2" style={{ color: pt.muted }}>
               <FolderOpen className="h-3.5 w-3.5" /> Projects
             </h2>
             {projects && projects.length > 0 ? (
