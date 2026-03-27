@@ -612,18 +612,18 @@ function ClientFeedbackSection({ portalId, accent, portalTheme: pt, clientName, 
       {feedback && feedback.length > 0 && (
         <div className="mt-4 space-y-2">
           {feedback.map((fb: any) => (
-            <div key={fb.id} className="bg-[#171717] border border-[#262626] rounded-lg p-3">
+            <div key={fb.id} className="rounded-lg p-3" style={{ backgroundColor: pt.card, borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }}>
               <div className="flex items-center gap-2 mb-1">
                 {typeIcon(fb.feedback_type)}
                 <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: accent }}>
                   {typeLabel(fb.feedback_type)}
                 </span>
-                <span className="text-[10px] text-[#555] ml-auto">
+                <span className="text-[10px] ml-auto" style={{ color: pt.muted + "88" }}>
                   {new Date(fb.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
-              <p className="text-sm text-white leading-relaxed">{fb.message}</p>
-              <p className="text-[10px] text-[#888] mt-1">— {fb.author_name}</p>
+              <p className="text-sm leading-relaxed" style={{ color: pt.text }}>{fb.message}</p>
+              <p className="text-[10px] mt-1" style={{ color: pt.muted }}>— {fb.author_name}</p>
             </div>
           ))}
         </div>
