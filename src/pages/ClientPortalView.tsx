@@ -599,7 +599,7 @@ function ClientFeedbackSection({ portalId, accent, portalTheme: pt, clientName, 
         />
         <Button
           className="mt-3 gap-1.5 text-xs"
-          style={{ backgroundColor: accent, color: "#0A0A0A" }}
+          style={{ backgroundColor: accent, color: pt.bg }}
           onClick={() => submitFeedback.mutate()}
           disabled={!message.trim() || submitFeedback.isPending}
         >
