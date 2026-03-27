@@ -346,7 +346,7 @@ const ClientPortalView = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                         {inv.status !== "paid" && (
-                          <button onClick={() => { setUploadingId(inv.id); fileInputRef.current?.click(); }} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="Upload payment proof">
+                          <button onClick={() => { setUploadingId(inv.id); fileInputRef.current?.click(); }} className="p-1.5 rounded transition-colors" style={{ color: pt.muted }} title="Upload payment proof">
                             <Upload className="h-4 w-4" />
                           </button>
                         )}
