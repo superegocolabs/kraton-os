@@ -342,7 +342,7 @@ const ClientPortalView = () => {
                     <div className="mt-3 flex items-center justify-between">
                       <span className="text-sm font-bold" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>{fmt(Number(inv.amount))}</span>
                       <div className="flex gap-1">
-                        <button onClick={() => setSelectedInvoice(inv)} className="p-1.5 rounded hover:bg-[#262626] transition-colors text-[#888] hover:text-white" title="View details">
+                        <button onClick={() => setSelectedInvoice(inv)} className="p-1.5 rounded transition-colors" style={{ color: pt.muted }} title="View details">
                           <Eye className="h-4 w-4" />
                         </button>
                         {inv.status !== "paid" && (
