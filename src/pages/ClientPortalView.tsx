@@ -354,11 +354,11 @@ const ClientPortalView = () => {
                     </div>
 
                     {pendingFile?.invoiceId === inv.id && (
-                      <div className="mt-3 p-3 bg-[#1a1a1a] border border-[#333] rounded-md">
-                        <div className="flex items-center gap-2 text-sm text-white">
+                      <div className="mt-3 p-3 rounded-md" style={{ backgroundColor: pt.bg, borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }}>
+                        <div className="flex items-center gap-2 text-sm" style={{ color: pt.text }}>
                           <File className="h-4 w-4 shrink-0" style={{ color: accent }} />
                           <span className="truncate flex-1">{pendingFile.file.name}</span>
-                          <span className="text-xs text-[#888] shrink-0">{(pendingFile.file.size / 1024).toFixed(0)} KB</span>
+                          <span className="text-xs shrink-0" style={{ color: pt.muted }}>{(pendingFile.file.size / 1024).toFixed(0)} KB</span>
                         </div>
                         <div className="flex gap-2 mt-2">
                           <Button size="sm" className="flex-1 gap-1.5 text-xs" style={{ backgroundColor: accent, color: "#0A0A0A" }} onClick={handleSendProof} disabled={isSending}>
