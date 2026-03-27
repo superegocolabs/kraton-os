@@ -419,11 +419,11 @@ const ClientPortalView = () => {
               </div>
             </div>
 
-            <div className="p-4 md:p-6 border-b border-[#262626]">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-2">Bill To</p>
-              <p className="text-sm font-medium text-white">{portal.clients?.name}</p>
-              {portal.clients?.company && <p className="text-xs text-[#888]">{portal.clients.company}</p>}
-              {portal.clients?.email && <p className="text-xs text-[#888]">{portal.clients.email}</p>}
+            <div className="p-4 md:p-6" style={{ borderBottomColor: pt.border, borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
+              <p className="text-[10px] uppercase tracking-[0.15em] mb-2" style={{ color: pt.muted }}>Bill To</p>
+              <p className="text-sm font-medium" style={{ color: pt.text }}>{portal.clients?.name}</p>
+              {portal.clients?.company && <p className="text-xs" style={{ color: pt.muted }}>{portal.clients.company}</p>}
+              {portal.clients?.email && <p className="text-xs" style={{ color: pt.muted }}>{portal.clients.email}</p>}
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {selectedInvoice.due_date && (
                   <div>
