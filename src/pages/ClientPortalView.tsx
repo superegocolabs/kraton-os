@@ -452,10 +452,10 @@ const ClientPortalView = () => {
               </div>
             )}
 
-            <div className="p-4 md:p-6 border-b border-[#262626]">
+            <div className="p-4 md:p-6" style={{ borderBottomColor: pt.border, borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-[#888]">Total</span>
-                <span className="text-2xl font-bold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{fmt(Number(selectedInvoice.amount))}</span>
+                <span className="text-sm font-medium" style={{ color: pt.muted }}>Total</span>
+                <span className="text-2xl font-bold" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>{fmt(Number(selectedInvoice.amount))}</span>
               </div>
             </div>
 
