@@ -234,7 +234,7 @@ const ClientPortalView = () => {
   const projectStatusColor = (status: string) => {
     if (status === "completed") return "#4ade80";
     if (status === "active" || status === "in_progress") return accent;
-    return "#888";
+    return pt.muted;
   };
 
   const projectStatusLabel = (status: string) => {
