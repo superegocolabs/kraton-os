@@ -439,13 +439,13 @@ const ClientPortalView = () => {
             </div>
 
             {lineItems(selectedInvoice).length > 0 && (
-              <div className="p-4 md:p-6 border-b border-[#262626]">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-[#888] mb-3">Items</p>
+              <div className="p-4 md:p-6" style={{ borderBottomColor: pt.border, borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
+                <p className="text-[10px] uppercase tracking-[0.15em] mb-3" style={{ color: pt.muted }}>Items</p>
                 <div className="space-y-2">
                   {lineItems(selectedInvoice).map((item: any, idx: number) => (
                     <div key={idx} className="flex justify-between text-sm">
-                      <span className="text-white">{item.description || item.name || `Item ${idx + 1}`}</span>
-                      <span className="text-white font-medium">{fmt(Number(item.amount || 0))}</span>
+                      <span style={{ color: pt.text }}>{item.description || item.name || `Item ${idx + 1}`}</span>
+                      <span className="font-medium" style={{ color: pt.text }}>{fmt(Number(item.amount || 0))}</span>
                     </div>
                   ))}
                 </div>
