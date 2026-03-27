@@ -328,7 +328,7 @@ const ClientPortalView = () => {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <FileText className="h-3.5 w-3.5 shrink-0" style={{ color: accent }} />
-                          <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{inv.invoice_number}</span>
+                          <span className="text-sm font-medium" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>{inv.invoice_number}</span>
                         </div>
                         {inv.due_date && <p className="text-[10px] text-[#555] mt-1">Due {new Date(inv.due_date).toLocaleDateString()}</p>}
                       </div>
