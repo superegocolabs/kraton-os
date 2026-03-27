@@ -290,7 +290,7 @@ const ClientPortalView = () => {
                   <motion.div key={p.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
                     className="rounded-lg p-4" style={{ backgroundColor: pt.card, borderColor: pt.border, borderWidth: 1, borderStyle: 'solid' }}>
                     <div className="flex items-start justify-between gap-2">
-                      <span className="text-sm font-medium text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{p.name}</span>
+                      <span className="text-sm font-medium" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>{p.name}</span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-medium" style={{
                         backgroundColor: projectStatusColor(p.status) + "20",
                         color: projectStatusColor(p.status),
