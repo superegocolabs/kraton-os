@@ -594,8 +594,8 @@ function ClientFeedbackSection({ portalId, accent, portalTheme: pt, clientName, 
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Write your feedback..."
-          className="bg-[#0A0A0A] border-[#262626] text-white text-sm min-h-[80px] focus-visible:ring-0"
-          style={{ borderColor: accent + "30" }}
+          className="text-sm min-h-[80px] focus-visible:ring-0"
+          style={{ backgroundColor: pt.bg, borderColor: accent + "30", color: pt.text }}
         />
         <Button
           className="mt-3 gap-1.5 text-xs"
