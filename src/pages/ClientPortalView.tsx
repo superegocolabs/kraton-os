@@ -330,7 +330,7 @@ const ClientPortalView = () => {
                           <FileText className="h-3.5 w-3.5 shrink-0" style={{ color: accent }} />
                           <span className="text-sm font-medium" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>{inv.invoice_number}</span>
                         </div>
-                        {inv.due_date && <p className="text-[10px] text-[#555] mt-1">Due {new Date(inv.due_date).toLocaleDateString()}</p>}
+                        {inv.due_date && <p className="text-[10px] mt-1" style={{ color: pt.muted + "88" }}>Due {new Date(inv.due_date).toLocaleDateString()}</p>}
                       </div>
                       <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-medium" style={{
                         backgroundColor: inv.status === "paid" ? "#4ade8020" : accent + "20",
