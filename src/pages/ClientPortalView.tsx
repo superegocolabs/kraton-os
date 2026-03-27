@@ -413,7 +413,7 @@ const ClientPortalView = () => {
                     <p className="text-sm mt-1" style={{ color: pt.muted }}>{selectedInvoice.invoice_number}</p>
                   </div>
                 </div>
-                <button onClick={() => setSelectedInvoice(null)} className="text-[#888] hover:text-white p-1">
+                <button onClick={() => setSelectedInvoice(null)} className="p-1" style={{ color: pt.muted }}>
                   <X className="h-5 w-5" />
                 </button>
               </div>
