@@ -298,7 +298,7 @@ const ClientPortalView = () => {
                         {projectStatusLabel(p.status)}
                       </span>
                     </div>
-                    {p.description && <p className="text-xs text-[#888] mt-2 leading-relaxed">{p.description}</p>}
+                    {p.description && <p className="text-xs mt-2 leading-relaxed" style={{ color: pt.muted }}>{p.description}</p>}
                     {(p.start_date || p.end_date) && (
                       <p className="text-[10px] text-[#555] mt-2">
                         {p.start_date && new Date(p.start_date).toLocaleDateString()}
