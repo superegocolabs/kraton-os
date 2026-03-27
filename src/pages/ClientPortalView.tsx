@@ -197,7 +197,7 @@ const ClientPortalView = () => {
   // PIN Gate
   if (hasPin && !pinVerified) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] px-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ fontFamily: 'Inter, sans-serif', backgroundColor: pt.bg }}>
         <div className="h-1 absolute top-0 left-0 right-0" style={{ backgroundColor: accent }} />
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm mx-auto w-full">
           {brandLogoUrl && (
