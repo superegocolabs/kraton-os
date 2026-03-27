@@ -207,8 +207,8 @@ const ClientPortalView = () => {
             <Lock className="h-7 w-7" style={{ color: accent }} />
           </div>
           <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: accent }}>{brandName}</p>
-          <h1 className="text-xl font-bold text-white mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Portal Access</h1>
-          <p className="text-sm text-[#888] mb-6">Enter the access code to view this portal.</p>
+          <h1 className="text-xl font-bold mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', color: pt.text }}>Portal Access</h1>
+          <p className="text-sm mb-6" style={{ color: pt.muted }}>Enter the access code to view this portal.</p>
           <div className="space-y-3">
             <Input
               value={pinInput}
