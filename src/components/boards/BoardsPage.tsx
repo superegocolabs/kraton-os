@@ -146,8 +146,9 @@ export function BoardsPage({ user }: BoardsPageProps) {
 
       {/* Create dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-describedby="new-board-desc">
           <DialogHeader><DialogTitle className="font-display">New Board</DialogTitle></DialogHeader>
+          <p id="new-board-desc" className="sr-only">Buat board baru untuk manajemen tugas</p>
           <div className="space-y-4">
             <div>
               <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
