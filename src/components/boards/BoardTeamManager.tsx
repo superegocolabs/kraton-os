@@ -201,11 +201,12 @@ export function BoardTeamManager({ boardId, boardTitle, open, onOpenChange }: Bo
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-describedby="share-board-desc">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" /> Share Board
             </DialogTitle>
+            <p id="share-board-desc" className="sr-only">Undang anggota ke board ini via email</p>
           </DialogHeader>
 
           <div className="space-y-4">

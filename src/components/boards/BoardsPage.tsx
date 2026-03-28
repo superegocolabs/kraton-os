@@ -167,8 +167,9 @@ export function BoardsPage({ user }: BoardsPageProps) {
 
       {/* Edit dialog */}
       <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setEditDialogOpen(false); setEditingBoard(null); } }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-describedby="edit-board-desc">
           <DialogHeader><DialogTitle className="font-display">Edit Board</DialogTitle></DialogHeader>
+          <p id="edit-board-desc" className="sr-only">Edit judul dan deskripsi board</p>
           <div className="space-y-4">
             <div>
               <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
