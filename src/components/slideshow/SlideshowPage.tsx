@@ -38,7 +38,7 @@ interface Slide {
 const TEMPLATES: Record<string, { name: string; description: string; color: string; gradient: string; slides: Slide[] }> = {
   minimal: {
     name: "Minimal",
-    description: "Clean, focused presentation with elegant typography",
+    description: "Clean, focused presentation",
     color: "hsl(32, 30%, 63%)",
     gradient: "from-[#1a1a1a] to-[#0a0a0a]",
     slides: [
@@ -56,7 +56,7 @@ const TEMPLATES: Record<string, { name: string; description: string; color: stri
   },
   creative: {
     name: "Creative",
-    description: "Bold and vibrant with strong visual impact",
+    description: "Bold & vibrant visual impact",
     color: "#F96167",
     gradient: "from-[#2a0a0c] to-[#0a0a0a]",
     slides: [
@@ -74,7 +74,7 @@ const TEMPLATES: Record<string, { name: string; description: string; color: stri
   },
   corporate: {
     name: "Corporate",
-    description: "Professional and structured for business presentations",
+    description: "Professional business style",
     color: "#065A82",
     gradient: "from-[#051a28] to-[#0a0a0a]",
     slides: [
@@ -88,6 +88,96 @@ const TEMPLATES: Record<string, { name: string; description: string; color: stri
       { layout: "quote", title: "Their strategic approach delivered a 40% increase in revenue.", subtitle: "— CEO, Enterprise Corp.", body: "", items: [] },
       { layout: "pricing", title: "Engagement Options", subtitle: "", body: "Scalable solutions for all sizes.", items: ["Consulting", "Full Service", "Retainer"] },
       { layout: "contact", title: "Next Steps", subtitle: "Schedule a consultation", body: "partnerships@company.com", items: [] },
+    ],
+  },
+  elegant: {
+    name: "Elegant",
+    description: "Luxury, refined & sophisticated",
+    color: "#D4AF37",
+    gradient: "from-[#1a1508] to-[#0a0a0a]",
+    slides: [
+      { layout: "title", title: "Elegant Presentation", subtitle: "Where Luxury Meets Purpose", body: "", items: [] },
+      { layout: "intro", title: "Our Philosophy", subtitle: "", body: "Crafting timeless experiences with meticulous attention to detail and uncompromising quality.", items: [] },
+      { layout: "problem", title: "The Opportunity", subtitle: "", body: "Elevating your brand to match the caliber of your vision.", items: ["Premium positioning", "Refined aesthetics", "Exclusive appeal"] },
+      { layout: "solution", title: "The Approach", subtitle: "", body: "A bespoke process designed for discerning clients.", items: ["Consultation", "Concept Development", "Artful Execution"] },
+      { layout: "features", title: "Our Expertise", subtitle: "", body: "", items: ["Luxury Branding", "Editorial Design", "Art Direction", "Experiential Design"] },
+      { layout: "process", title: "The Journey", subtitle: "", body: "", items: ["Vision", "Inspiration", "Creation", "Refinement", "Unveiling"] },
+      { layout: "work", title: "Selected Portfolio", subtitle: "", body: "A curated collection of our finest work.", items: [] },
+      { layout: "quote", title: "Exceptional taste and flawless execution — a true partner in luxury.", subtitle: "— Founder, Maison Luxe", body: "", items: [] },
+      { layout: "pricing", title: "Investment Tiers", subtitle: "", body: "Tailored engagements for exceptional results.", items: ["Atelier", "Signature", "Bespoke"] },
+      { layout: "contact", title: "Begin Your Story", subtitle: "Schedule a private consultation", body: "atelier@elegant.com", items: [] },
+    ],
+  },
+  neon: {
+    name: "Neon",
+    description: "Futuristic & eye-catching",
+    color: "#00F5D4",
+    gradient: "from-[#001a15] to-[#0a0a0a]",
+    slides: [
+      { layout: "title", title: "Neon Presentation", subtitle: "The Future is Now", body: "", items: [] },
+      { layout: "intro", title: "About Us", subtitle: "", body: "We build digital products that push the boundaries of what's possible.", items: [] },
+      { layout: "problem", title: "The Gap", subtitle: "", body: "Your digital presence should feel as innovative as your product.", items: ["Outdated tech stack", "Poor UX", "Slow performance"] },
+      { layout: "solution", title: "Our Stack", subtitle: "", body: "Cutting-edge technology with pixel-perfect execution.", items: ["React & Next.js", "AI Integration", "Real-time Systems"] },
+      { layout: "features", title: "Capabilities", subtitle: "", body: "", items: ["Web Apps", "Mobile Apps", "AI/ML Solutions", "Cloud Infrastructure"] },
+      { layout: "process", title: "Sprint Plan", subtitle: "", body: "", items: ["Sprint 0: Setup", "Sprint 1-2: Core", "Sprint 3-4: Features", "Sprint 5: Polish", "Sprint 6: Launch"] },
+      { layout: "work", title: "Shipped Products", subtitle: "", body: "Products that millions of users love.", items: [] },
+      { layout: "quote", title: "They turned our MVP into a product that raised $10M Series A.", subtitle: "— CTO, TechStart", body: "", items: [] },
+      { layout: "pricing", title: "Plans", subtitle: "", body: "Scale as you grow.", items: ["Launchpad", "Growth", "Enterprise"] },
+      { layout: "contact", title: "Let's Build", subtitle: "Start your project today", body: "hello@neonlab.dev", items: [] },
+    ],
+  },
+  warmth: {
+    name: "Warmth",
+    description: "Cozy, personal & inviting",
+    color: "#E07A5F",
+    gradient: "from-[#1a0e0a] to-[#0a0a0a]",
+    slides: [
+      { layout: "title", title: "Warm Presentation", subtitle: "Crafted with Heart & Soul", body: "", items: [] },
+      { layout: "intro", title: "Our Story", subtitle: "", body: "Born from a passion for meaningful design that connects people and brands.", items: [] },
+      { layout: "problem", title: "What We See", subtitle: "", body: "Too many brands feel cold and disconnected from their audience.", items: ["Generic branding", "Lack of personality", "Weak storytelling"] },
+      { layout: "solution", title: "What We Do", subtitle: "", body: "We infuse warmth and authenticity into every touchpoint.", items: ["Brand Storytelling", "Visual Identity", "Content Strategy"] },
+      { layout: "features", title: "Services", subtitle: "", body: "", items: ["Brand Identity", "Packaging Design", "Photography", "Social Media"] },
+      { layout: "process", title: "How It Works", subtitle: "", body: "", items: ["Coffee Chat", "Deep Dive", "Mood Board", "Design", "Launch Day"] },
+      { layout: "work", title: "Featured Work", subtitle: "", body: "Projects close to our heart.", items: [] },
+      { layout: "quote", title: "They captured the essence of our brand perfectly — it finally feels like us.", subtitle: "— Owner, Artisan Bakery", body: "", items: [] },
+      { layout: "pricing", title: "Packages", subtitle: "", body: "Thoughtfully structured for every stage.", items: ["Seed", "Bloom", "Flourish"] },
+      { layout: "contact", title: "Let's Connect", subtitle: "We'd love to hear your story", body: "hello@warmstudio.co", items: [] },
+    ],
+  },
+  pitch: {
+    name: "Pitch Deck",
+    description: "Startup investor pitch",
+    color: "#7C3AED",
+    gradient: "from-[#0f0520] to-[#0a0a0a]",
+    slides: [
+      { layout: "title", title: "Company Name", subtitle: "Tagline — One sentence that captures everything", body: "", items: [] },
+      { layout: "problem", title: "The Problem", subtitle: "", body: "A massive $XX billion market suffers from this critical pain point.", items: ["Pain point 1", "Pain point 2", "Pain point 3"] },
+      { layout: "solution", title: "Our Solution", subtitle: "", body: "We've built the first platform that solves this elegantly.", items: ["Key differentiator 1", "Key differentiator 2", "Key differentiator 3"] },
+      { layout: "features", title: "How It Works", subtitle: "", body: "", items: ["Step 1: Sign up", "Step 2: Connect", "Step 3: Grow", "Step 4: Scale"] },
+      { layout: "work", title: "Traction", subtitle: "", body: "10K+ users · $500K ARR · 40% MoM growth · 95% retention", items: [] },
+      { layout: "intro", title: "Business Model", subtitle: "", body: "SaaS subscription with three tiers. Average contract value $2,400/year with 120% net revenue retention.", items: [] },
+      { layout: "process", title: "Go-to-Market", subtitle: "", body: "", items: ["Product-led growth", "Content marketing", "Strategic partnerships", "Enterprise sales", "Community building"] },
+      { layout: "features", title: "The Team", subtitle: "", body: "", items: ["CEO — 10yr industry veteran", "CTO — Ex-Google engineer", "CMO — Growth expert", "COO — Operations leader"] },
+      { layout: "pricing", title: "The Ask", subtitle: "", body: "Raising $3M Series Seed to accelerate growth.", items: ["Product development", "Team expansion", "Market expansion"] },
+      { layout: "contact", title: "Thank You", subtitle: "Let's change the industry together", body: "founder@startup.com", items: [] },
+    ],
+  },
+  portfolio: {
+    name: "Portfolio",
+    description: "Showcase creative work",
+    color: "#EC4899",
+    gradient: "from-[#1a0515] to-[#0a0a0a]",
+    slides: [
+      { layout: "title", title: "Creative Portfolio", subtitle: "Selected Works 2024–2025", body: "", items: [] },
+      { layout: "intro", title: "Hello, I'm [Name]", subtitle: "", body: "A multidisciplinary designer specializing in brand identity, digital experiences, and visual storytelling.", items: [] },
+      { layout: "features", title: "What I Do", subtitle: "", body: "", items: ["Brand Identity", "UI/UX Design", "Motion Graphics", "Art Direction"] },
+      { layout: "work", title: "Project: Lumina", subtitle: "", body: "Complete rebrand for a premium wellness company. Increased brand recognition by 300%.", items: [] },
+      { layout: "work", title: "Project: Vertex", subtitle: "", body: "Digital product design for a fintech startup. Launched to 50K users in first month.", items: [] },
+      { layout: "work", title: "Project: Aura", subtitle: "", body: "Visual identity and packaging design for an artisan fragrance house.", items: [] },
+      { layout: "quote", title: "One of the most talented designers I've ever worked with.", subtitle: "— Design Lead, Google", body: "", items: [] },
+      { layout: "process", title: "My Process", subtitle: "", body: "", items: ["Listen", "Research", "Explore", "Create", "Iterate"] },
+      { layout: "intro", title: "Awards & Recognition", subtitle: "", body: "Awwwards Site of the Day · Behance Featured · Communication Arts Award · Red Dot Design Award", items: [] },
+      { layout: "contact", title: "Let's Create Together", subtitle: "Open for freelance & collaboration", body: "hello@designer.com", items: [] },
     ],
   },
 };
@@ -386,8 +476,9 @@ export function SlideshowPage({ user }: SlideshowPageProps) {
 
           {/* Add Text Dialog */}
           <Dialog open={addingText} onOpenChange={setAddingText}>
-            <DialogContent className="sm:max-w-sm">
+            <DialogContent className="sm:max-w-sm" aria-describedby="add-text-desc">
               <DialogHeader><DialogTitle className="font-display">Add Text Element</DialogTitle></DialogHeader>
+              <p id="add-text-desc" className="sr-only">Tambahkan elemen teks ke slide</p>
               <div>
                 <Input value={newTextValue} onChange={(e) => setNewTextValue(e.target.value)} placeholder="Enter text..." className="bg-transparent border-border font-body"
                   onKeyDown={(e) => e.key === "Enter" && handleAddTextElement()} autoFocus />
@@ -538,8 +629,9 @@ export function SlideshowPage({ user }: SlideshowPageProps) {
 
       {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg" aria-describedby="create-pres-desc">
           <DialogHeader><DialogTitle className="font-display">New Presentation</DialogTitle></DialogHeader>
+          <p id="create-pres-desc" className="sr-only">Pilih template dan buat presentasi baru</p>
           <div className="space-y-4">
             <div>
               <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
@@ -547,13 +639,13 @@ export function SlideshowPage({ user }: SlideshowPageProps) {
             </div>
             <div>
               <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider mb-3 block">Template</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {Object.entries(TEMPLATES).map(([key, tmpl]) => (
                   <button key={key} onClick={() => setSelectedTemplate(key)}
-                    className={`p-3 rounded-lg border text-left transition-colors ${selectedTemplate === key ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"}`}>
+                    className={`p-2.5 rounded-lg border text-left transition-colors ${selectedTemplate === key ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"}`}>
                     <div className="w-full h-1 rounded mb-2" style={{ backgroundColor: tmpl.color }} />
-                    <p className="text-sm font-display font-bold text-foreground">{tmpl.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-body mt-0.5">{tmpl.description}</p>
+                    <p className="text-xs font-display font-bold text-foreground">{tmpl.name}</p>
+                    <p className="text-[9px] text-muted-foreground font-body mt-0.5 line-clamp-1">{tmpl.description}</p>
                   </button>
                 ))}
               </div>

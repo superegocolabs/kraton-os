@@ -717,6 +717,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_profiles_by_email: {
+        Args: { _email: string }
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"
