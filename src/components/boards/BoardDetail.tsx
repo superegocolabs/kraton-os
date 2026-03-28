@@ -472,7 +472,8 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
 
       {/* Edit Card Dialog */}
       <Dialog open={!!editingCard} onOpenChange={(open) => !open && setEditingCard(null)}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby="edit-card-desc">
+          <p id="edit-card-desc" className="sr-only">Edit detail kartu</p>
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Pencil className="h-4 w-4 text-primary" /> Edit Card
