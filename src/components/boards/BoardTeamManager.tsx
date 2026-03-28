@@ -97,21 +97,18 @@ export function BoardTeamManager({ boardId, boardTitle, open, onOpenChange }: Bo
     enabled: !!pendingInvites?.length,
   });
 
-  // Search for users by email
+  // Search for users by email using security definer function
   const { data: searchResults } = useQuery({
     queryKey: ["search-members", searchEmail],
     queryFn: async () => {
       if (!searchEmail || searchEmail.length < 3) return [];
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .ilike("email", `%${searchEmail}%`)
-        .limit(5);
+        .rpc("search_profiles_by_email", { _email: searchEmail });
       if (error) throw error;
       const memberIds = members?.map(m => m.user_id) ?? [];
       const pendingIds = pendingInvites?.map(i => i.invited_user_id) ?? [];
       const excludeIds = [...memberIds, ...(currentUser?.id ? [currentUser.id] : [])];
-      return (data ?? []).filter(p => !excludeIds.includes(p.id) && !pendingIds.includes(p.id));
+      return (data ?? []).filter((p: any) => !excludeIds.includes(p.id) && !pendingIds.includes(p.id));
     },
     enabled: searchEmail.length >= 3 && open,
   });
