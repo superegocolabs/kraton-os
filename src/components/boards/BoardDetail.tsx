@@ -411,7 +411,8 @@ export function BoardDetail({ board, onBack }: BoardDetailProps) {
 
       {/* Preview Card Dialog (read-only) */}
       <Dialog open={!!previewCard} onOpenChange={(open) => !open && setPreviewCard(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg" aria-describedby="preview-card-desc">
+          <p id="preview-card-desc" className="sr-only">Preview detail kartu</p>
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Eye className="h-4 w-4 text-primary" /> Card Preview
