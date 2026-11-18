@@ -16,7 +16,7 @@ import { ProfilePage } from "@/components/profile/ProfilePage";
 import { SlideshowPage } from "@/components/slideshow/SlideshowPage";
 import { CalendarPage } from "@/components/calendar/CalendarPage";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { User } from "@supabase/supabase-js";
+import { Session, User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -25,22 +25,16 @@ const Dashboard = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) { navigate("/auth"); }
-      else {
-        setUser(session.user);
-        supabase.from("profiles").upsert({ id: session.user.id, email: session.user.email, full_name: session.user.user_metadata?.full_name ?? null }, { onConflict: "id" }).then(() => {});
-      }
+    const handleSession = (session: Session | null) => {
+      if (!session) { navigate("/auth"); return; }
+      setUser(session.user);
       setLoading(false);
+      supabase.from("profiles").upsert({ id: session.user.id, email: session.user.email, full_name: session.user.user_metadata?.full_name ?? null }, { onConflict: "id" }).then(() => {});
+    };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || event === "SIGNED_IN") handleSession(session);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { navigate("/auth"); }
-      else {
-        setUser(session.user);
-        supabase.from("profiles").upsert({ id: session.user.id, email: session.user.email, full_name: session.user.user_metadata?.full_name ?? null }, { onConflict: "id" }).then(() => {});
-      }
-      setLoading(false);
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session));
     return () => subscription.unsubscribe();
   }, [navigate]);
 

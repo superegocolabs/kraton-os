@@ -26,6 +26,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const queryClient = useQueryClient();
+  const closeDialog = () => { setAddDialogOpen(false); setEditDialogOpen(false); setEditingBoard(null); setNewTitle(""); setNewDesc(""); };
   const { isMember } = useMembership(user?.id);
 
   const { data: boards, isLoading } = useQuery({
@@ -45,7 +46,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
       const { error } = await supabase.from("boards").insert({ title: newTitle.trim(), description: newDesc.trim() || null, user_id: user!.id });
       if (error) throw error;
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["boards"] }); toast.success("Board created."); setAddDialogOpen(false); setNewTitle(""); setNewDesc(""); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["boards"] }); toast.success("Board created."); closeDialog(); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -54,7 +55,7 @@ export function BoardsPage({ user }: BoardsPageProps) {
       const { error } = await supabase.from("boards").update({ title, description, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["boards"] }); toast.success("Board updated."); setEditDialogOpen(false); setEditingBoard(null); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["boards"] }); toast.success("Board updated."); closeDialog(); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -144,11 +145,10 @@ export function BoardsPage({ user }: BoardsPageProps) {
         </div>
       </motion.div>
 
-      {/* Create dialog */}
-      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-md" aria-describedby="new-board-desc">
-          <DialogHeader><DialogTitle className="font-display">New Board</DialogTitle></DialogHeader>
-          <p id="new-board-desc" className="sr-only">Buat board baru untuk manajemen tugas</p>
+      <Dialog open={addDialogOpen || editDialogOpen} onOpenChange={(open) => { if (!open) closeDialog(); }}>
+        <DialogContent className="sm:max-w-md" aria-describedby="board-dialog-desc">
+          <DialogHeader><DialogTitle className="font-display">{editingBoard ? "Edit Board" : "New Board"}</DialogTitle></DialogHeader>
+          <p id="board-dialog-desc" className="sr-only">Board title and description</p>
           <div className="space-y-4">
             <div>
               <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
@@ -160,28 +160,10 @@ export function BoardsPage({ user }: BoardsPageProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="accent" onClick={() => addBoard.mutate()} disabled={!newTitle.trim() || addBoard.isPending}>Create Board</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setEditDialogOpen(false); setEditingBoard(null); } }}>
-        <DialogContent className="sm:max-w-md" aria-describedby="edit-board-desc">
-          <DialogHeader><DialogTitle className="font-display">Edit Board</DialogTitle></DialogHeader>
-          <p id="edit-board-desc" className="sr-only">Edit judul dan deskripsi board</p>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Title</label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Board title" className="mt-1.5 bg-transparent border-border font-body" />
-            </div>
-            <div>
-              <label className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">Description</label>
-              <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Optional description" className="mt-1.5 bg-transparent border-border font-body min-h-[80px]" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="accent" onClick={() => editingBoard && updateBoard.mutate({ id: editingBoard.id, title: newTitle.trim(), description: newDesc.trim() || null })} disabled={!newTitle.trim() || updateBoard.isPending}>Save Changes</Button>
+            <Button variant="accent" disabled={!newTitle.trim() || addBoard.isPending || updateBoard.isPending}
+              onClick={() => editingBoard ? updateBoard.mutate({ id: editingBoard.id, title: newTitle.trim(), description: newDesc.trim() || null }) : addBoard.mutate()}>
+              {editingBoard ? "Save Changes" : "Create Board"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
