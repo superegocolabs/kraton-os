@@ -14,10 +14,15 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Plus Jakarta Sans"', 'sans-serif'],
-        body: ['Inter', 'sans-serif'],
+        display: ['"Manrope"', 'sans-serif'],
+        body: ['"DM Sans"', 'sans-serif'],
       },
       colors: {
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        highlight: { DEFAULT: "hsl(var(--highlight))", foreground: "hsl(var(--highlight-foreground))" },
+        coral: { DEFAULT: "hsl(var(--coral))", foreground: "hsl(var(--coral-foreground))" },
+        cover: { DEFAULT: "hsl(var(--cover))", foreground: "hsl(var(--cover-foreground))", muted: "hsl(var(--cover-muted))", accent: "hsl(var(--cover-accent))" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

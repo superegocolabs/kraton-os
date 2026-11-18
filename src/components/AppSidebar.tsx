@@ -12,6 +12,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useState } from "react";
+import { BrandMark } from "@/components/BrandMark";
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -33,7 +34,7 @@ const brainstormItems = [
 interface AppSidebarProps { user: User | null; }
 
 export function AppSidebar({ user }: AppSidebarProps) {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,11 +46,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const handleSignOut = async () => { await supabase.auth.signOut(); navigate("/auth"); };
   const isActive = (url: string) => location.pathname === url || (url !== "/dashboard" && location.pathname.startsWith(url));
 
+  const goTo = (url: string) => { navigate(url); if (isMobile) setOpenMobile(false); };
+
   const navButton = (item: { title: string; url: string; icon: any }) => {
     const active = isActive(item.url);
     return (
       <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton onClick={() => navigate(item.url)} className={`transition-colors duration-150 ${active ? "bg-muted text-primary font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"}`}>
+        <SidebarMenuButton tooltip={item.title} isActive={active} onClick={() => goTo(item.url)} className={`h-10 gap-3 transition-colors duration-150 ${active ? "bg-sidebar-accent text-sidebar-primary font-semibold" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}>
           <item.icon className="h-4 w-4 shrink-0" />
           {!collapsed && <span className="font-body text-sm">{item.title}</span>}
         </SidebarMenuButton>
@@ -58,17 +61,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <div className="h-14 flex items-center px-4 border-b border-border">
-        {!collapsed ? (
-          <div><span className="text-sm font-display font-bold text-foreground">Kraton</span><span className="text-[10px] text-muted-foreground ml-1.5 uppercase tracking-[0.15em] font-body">OS</span></div>
-        ) : (
-          <span className="text-sm font-display font-bold text-foreground mx-auto">K</span>
-        )}
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <div className="h-20 flex items-center px-4 border-b border-sidebar-border text-sidebar-accent-foreground">
+        <BrandMark compact={collapsed} />
       </div>
-      <SidebarContent className="pt-2">
+      <SidebarContent className="pt-4 px-1">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-sidebar-foreground font-body">Workspace</SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>{mainNavItems.map(navButton)}</SidebarMenu></SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
@@ -76,7 +75,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
             <SidebarGroupContent><SidebarMenu>{brainstormItems.map(navButton)}</SidebarMenu></SidebarGroupContent>
           ) : (
             <Collapsible open={brainstormOpen} onOpenChange={setBrainstormOpen}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body hover:text-foreground transition-colors">
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1.5 text-[10px] uppercase tracking-[0.15em] text-sidebar-foreground font-body hover:text-sidebar-accent-foreground transition-colors">
                 <span className="flex items-center gap-1.5"><Brain className="h-3 w-3" /> Brainstorming</span>
                 <ChevronDown className={`h-3 w-3 transition-transform ${brainstormOpen ? "rotate-180" : ""}`} />
               </CollapsibleTrigger>
@@ -86,11 +85,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </SidebarGroup>
         {role === "admin" && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">Admin</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.15em] text-sidebar-foreground font-body">Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => navigate("/admin")} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150">
+                  <SidebarMenuButton tooltip="Admin Panel" onClick={() => goTo("/admin")} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-150">
                     <Shield className="h-4 w-4 shrink-0" />
                     {!collapsed && <span className="font-body text-sm">Admin Panel</span>}
                   </SidebarMenuButton>
@@ -100,17 +99,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </SidebarGroup>
         )}
       </SidebarContent>
-      <SidebarFooter className="border-t border-border p-2">
+      <SidebarFooter className="border-t border-sidebar-border p-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => navigate("/dashboard/profile")}
-              className={`transition-colors duration-150 ${isActive("/dashboard/profile") ? "bg-muted text-primary font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"}`}>
+            <SidebarMenuButton tooltip="Profile" onClick={() => goTo("/dashboard/profile")}
+              className={`h-10 gap-3 transition-colors duration-150 ${isActive("/dashboard/profile") ? "bg-sidebar-accent text-sidebar-primary font-semibold" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}>
               <UserCircle className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="font-body text-sm">Profile</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleSignOut} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors duration-150">
+            <SidebarMenuButton onClick={handleSignOut} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-150">
               <LogOut className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="font-body text-sm">Sign Out</span>}
             </SidebarMenuButton>

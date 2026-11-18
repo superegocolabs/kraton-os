@@ -69,11 +69,12 @@ const Dashboard = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar user={user} />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center border-b border-border px-4 shrink-0">
+          <header className="h-20 flex items-center gap-3 border-b border-border bg-card px-4 sm:px-8 shrink-0">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+            <div className="flex min-w-0 items-center gap-2 text-sm"><span className="hidden sm:inline text-muted-foreground">Workspace</span><span className="hidden sm:inline text-border">/</span><span className="truncate font-medium capitalize">{location.pathname.split("/")[2] || "Overview"}</span></div>
             <div className="ml-auto flex items-center gap-3">
               <NotificationBell userId={user?.id} />
-              <span className="text-xs text-muted-foreground font-body truncate max-w-[200px]">{user?.email}</span>
+              <span className="text-xs text-muted-foreground font-body truncate max-w-[120px] sm:max-w-[200px]">{user?.email}</span>
             </div>
           </header>
           <main className="flex-1 overflow-auto">{renderContent()}</main>

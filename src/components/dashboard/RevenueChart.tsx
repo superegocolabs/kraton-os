@@ -44,18 +44,18 @@ export function RevenueChart() {
       <AreaChart data={data}>
         <defs>
           <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(32, 30%, 63%)" stopOpacity={0.4} />
-            <stop offset="100%" stopColor="hsl(32, 30%, 63%)" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <XAxis dataKey="name" tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 11 }} axisLine={false} tickLine={false} width={60} tickFormatter={(v) => formatCurrency(v)} />
+        <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={60} tickFormatter={(v) => formatCurrency(v)} />
         <Tooltip
-          contentStyle={{ background: "hsl(0, 0%, 9%)", border: "1px solid hsl(0, 0%, 15%)", borderRadius: 6, fontSize: 12 }}
-          labelStyle={{ color: "hsl(0, 0%, 55%)" }}
+          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
+          labelStyle={{ color: "hsl(var(--muted-foreground))" }}
           formatter={(value: number) => [formatCurrency(value), "Revenue"]}
         />
-        <Area type="monotone" dataKey="revenue" stroke="hsl(32, 30%, 63%)" fill="url(#revGrad)" strokeWidth={2} />
+        <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="url(#revGrad)" strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
   );

@@ -1,104 +1,44 @@
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { ArrowRight, ArrowUpRight, FolderOpen, Layers, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
+import studio from "@/assets/kraton-studio.png.asset.json";
 
 const Index = () => {
   const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Nav */}
-      <nav className="h-14 flex items-center justify-between px-6 lg:px-12 border-b border-border">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-display font-bold text-foreground">Kraton</span>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-body">
-            Creative OS
-          </span>
+    <div className="min-h-screen bg-background">
+      <nav className="flex h-20 items-center justify-between border-b border-border px-6 lg:px-12">
+        <BrandMark />
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" onClick={() => navigate("/auth")}>Sign in</Button>
+          <Button className="hidden sm:inline-flex" onClick={() => navigate("/auth")} >Open workspace <ArrowUpRight /></Button>
         </div>
-        <Button
-          variant="ghost"
-          className="text-sm font-body text-muted-foreground hover:text-foreground"
-          onClick={() => navigate("/auth")}
-        >
-          Sign In
-        </Button>
       </nav>
-
-      {/* Hero */}
-      <div className="flex-1 flex items-center justify-center px-6 lg:px-12">
-        <motion.div
-          className="max-w-2xl text-center"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <p className="text-xs font-body uppercase tracking-[0.2em] text-primary mb-6">
-            Creative Business Operating System
-          </p>
-          <h1 className="text-4xl md:text-6xl font-display font-extrabold leading-[1.1] text-foreground">
-            The Architectural Backbone for Your Creative Studio.
-          </h1>
-          <p className="mt-6 text-base md:text-lg text-muted-foreground font-body max-w-lg mx-auto leading-relaxed">
-            From landing clients to tracking finances — Kraton is the complete system for running a stable, dependable creative business.
-          </p>
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <Button
-              variant="accent"
-              size="lg"
-              onClick={() => navigate("/auth")}
-              className="gap-2"
-            >
-              Get Started <ArrowRight className="h-4 w-4" />
-            </Button>
+      <section className="relative isolate flex min-h-[520px] items-center overflow-hidden bg-cover px-6 py-16 text-cover-foreground lg:min-h-[580px] lg:px-12">
+        <img src={studio.url} alt="Mint and lilac studio sculptures with polished chrome" className="absolute inset-0 -z-10 h-full w-full object-cover object-[65%_center]" />
+        <div className="absolute inset-0 -z-10 bg-cover/65 sm:bg-cover/20" />
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="max-w-lg">
+            <p className="mb-6 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-cover-accent"><span className="h-1.5 w-1.5 rounded-full bg-cover-accent" /> A little structure. More possibility.</p>
+            <h1 className="font-display text-5xl font-bold leading-[1.1] sm:text-7xl">KratonOS<span className="block mt-3 text-3xl font-medium leading-tight sm:text-4xl">Space for your<br />next great thing.</span></h1>
+            <p className="mt-6 max-w-sm text-base leading-relaxed text-cover-muted">Your projects, your people, your ideas.<br />One connected home for your creative studio.</p>
+            <Button size="lg" onClick={() => navigate("/auth")} className="mt-8 bg-cover-accent text-cover hover:bg-cover-accent/90">Enter your workspace <ArrowRight /></Button>
           </div>
-        </motion.div>
-      </div>
-
-      {/* Features */}
-      <div className="border-t border-border px-6 lg:px-12 py-16">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              num: "01",
-              title: "Pre-Made Frameworks",
-              desc: "Exact steps to find, pitch, and land clients. From proposals and contracts to onboarding — each step is clear.",
-            },
-            {
-              num: "02",
-              title: "Logical Workspace",
-              desc: "Manage finances, CRM, invoices, marketing, and daily projects in one unified spot. Never get lost in tabs again.",
-            },
-            {
-              num: "03",
-              title: "Client Portals",
-              desc: "Customisable, sharable client portals that keep you and your clients organised, happy, and recurring.",
-            },
-          ].map((f, i) => (
-            <motion.div
-              key={f.num}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 + i * 0.08 }}
-            >
-              <span className="text-primary font-display font-bold text-sm">{f.num}</span>
-              <h3 className="mt-2 text-lg font-display font-bold text-foreground">{f.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground font-body leading-relaxed">
-                {f.desc}
-              </p>
-            </motion.div>
-          ))}
         </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t border-border px-6 lg:px-12 py-6">
-        <p className="text-xs text-muted-foreground font-body text-center">
-          © {new Date().getFullYear()} Kraton — Creative Operating System. All rights reserved.
-        </p>
-      </footer>
+      </section>
+      <section className="mx-auto max-w-7xl px-6 py-10 lg:px-12 lg:py-12">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-3"><h2 className="text-2xl font-semibold">Less scattered. More connected.</h2><span className="text-xs text-muted-foreground">Made for the way studios work.</span></div>
+        <div className="grid gap-8 md:grid-cols-3">
+          {[
+            { icon: FolderOpen, title: "Your studio, in sync", desc: "Projects, clients, and finances — together, from first conversation to final delivery.", color: "bg-secondary text-secondary-foreground", number: "01" },
+            { icon: Layers, title: "Room for your ideas", desc: "Boards, notes, and presentations that turn a spark of inspiration into something real.", color: "bg-highlight text-highlight-foreground", number: "02" },
+            { icon: Globe, title: "A better client experience", desc: "A personal, branded space to share progress, invoices, and the work you're proud of.", color: "bg-coral text-coral-foreground", number: "03" },
+          ].map(({ icon: Icon, ...item }) => <div key={item.number} className="border-t border-border pt-6"><div className="flex items-center justify-between"><span className={`flex h-10 w-10 items-center justify-center rounded-md ${item.color}`}><Icon className="h-5 w-5" /></span><span className="text-xs text-muted-foreground">/{item.number}</span></div><h3 className="mt-5 text-lg font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.desc}</p></div>)}
+        </div>
+      </section>
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-6 py-6 text-xs text-muted-foreground lg:px-12"><span>© {new Date().getFullYear()} KratonOS</span><span>A home for creative work.</span></footer>
     </div>
   );
 };
-
 export default Index;
